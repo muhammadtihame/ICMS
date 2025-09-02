@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans 'Feedback Form' %} | {% trans 'Learning management system' %}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0">
+                        <i class="fas fa-star text-warning me-2"></i>
+                        {% trans 'Teacher Feedback Form' %}
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-warning text-center mb-4">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>{% trans 'Important Notice:' %}</strong>
+                        {% trans 'You must complete this feedback form before you can access any other features. This helps us improve the quality of education.' %}
+                    </div>
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <form method="post" id="feedbackForm">
+                        {% csrf_token %}
+                        
+                        <div class="form-group mb-4">
+                            <label for="{{ form.teacher_rating.id_for_label }}" class="form-label fw-bold text-danger">
+                                {% trans 'Teacher Rating' %} *
+                            </label>
+                            <div class="rating-input">
+                                {{ form.teacher_rating }}
+                                <div class="star-display mt-2" id="star_display"></div>
+                            </div>
+                            {% if form.teacher_rating.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.teacher_rating.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted">{% trans 'Rate your overall experience with teachers (1 = Poor, 5 = Excellent)' %}</small>
+                        </div>
+                        
+                        <div class="form-group mb-4">
+                            <label for="{{ form.comments.id_for_label }}" class="form-label fw-bold">
+                                {% trans 'Comments & Suggestions' %}
+                            </label>
+                            {{ form.comments }}
+                            {% if form.comments.errors %}
+                                <div class="text-danger small mt-1">
+                                    {% for error in form.comments.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                            <small class="text-muted">{% trans 'Share your thoughts on how we can improve (optional)' %}</small>
+                        </div>
+
+                        <div class="submit-section text-center">
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>{% trans 'Note:' %}</strong> 
+                                {% trans 'Rating field is required. You cannot proceed without completing this feedback.' %}
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-lg px-5" id="submitBtn">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                {% trans 'Submit Feedback & Continue' %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.rating-input input[type="number"] {
+    width: 100px;
+    padding: 10px;
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    font-size: 18px;
+    text-align: center;
+}
+
+.rating-input input[type="number"]:focus {
+    border-color: #0056b3;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.star-display {
+    font-size: 24px;
+    color: #ffc107;
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,123,255,0.4);
+}
+
+.alert-warning {
+    background: linear-gradient(45deg, #fff3cd, #ffeaa7);
+    border: 1px solid #ffc107;
+}
+
+textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('feedbackForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const ratingInput = document.getElementById('{{ form.teacher_rating.id_for_label }}');
+    const starDisplay = document.getElementById('star_display');
+    
+    // Show stars when rating is entered
+    ratingInput.addEventListener('input', function() {
+        const rating = this.value;
+        if (rating && rating >= 1 && rating <= 5) {
+            starDisplay.innerHTML = '★'.repeat(rating);
+        } else {
+            starDisplay.innerHTML = '';
+        }
+    });
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        const rating = ratingInput.value;
+        
+        if (!rating || rating < 1 || rating > 5) {
+            e.preventDefault();
+            alert('{% trans "Please provide a valid rating between 1 and 5." %}');
+            ratingInput.focus();
+            return false;
+        }
+        
+        // Disable submit button to prevent double submission
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{% trans "Submitting..." %}';
+    });
+    
+    // Prevent navigation away from page
+    window.addEventListener('beforeunload', function(e) {
+        e.preventDefault();
+        e.returnValue = '';
+    });
+    
+    // Prevent back button
+    history.pushState(null, null, location.href);
+    window.onpopstate = function() {
+        history.go(1);
+    };
+});
+</script>
+{% endblock content %}

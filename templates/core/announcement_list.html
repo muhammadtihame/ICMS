@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %} {% trans 'Announcements' %} | {% trans 'Learning management system' %} {% endblock title %}
+{% load static %}
+
+{% block content %}
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">{% trans 'Home' %}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{% trans 'Announcements' %}</li>
+    </ol>
+</nav>
+
+{% include 'snippets/messages.html' %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="title-1">{% trans 'Announcements' %}</h1>
+    {% if user.is_superuser or user.is_lecturer %}
+    <a href="{% url 'announcement_add' %}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> {% trans 'Add Announcement' %}
+    </a>
+    {% endif %}
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if announcements %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>{% trans 'Title' %}</th>
+                        <th>{% trans 'Content' %}</th>
+                        <th>{% trans 'Posted By' %}</th>
+                        <th>{% trans 'Created At' %}</th>
+                        {% if user.is_superuser or user.is_lecturer %}
+                        <th>{% trans 'Actions' %}</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for announcement in announcements %}
+                    <tr>
+                        <td>{{ announcement.title }}</td>
+                        <td>{{ announcement.content|truncatewords:20 }}</td>
+                        <td>{{ announcement.created_by.get_full_name|default:announcement.created_by.username }}</td>
+                        <td>{{ announcement.created_at|date:"M d, Y H:i" }}</td>
+                        {% if user.is_superuser or user.is_lecturer %}
+                        <td>
+                            <a href="{% url 'announcement_edit' announcement.pk %}" class="btn btn-sm btn-outline-primary">
+                                <i class="fas fa-edit"></i> {% trans 'Edit' %}
+                            </a>
+                            <a href="{% url 'announcement_delete' announcement.pk %}" class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-trash"></i> {% trans 'Delete' %}
+                            </a>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-bullhorn fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">{% trans 'No announcements yet' %}</h5>
+            {% if user.is_superuser or user.is_lecturer %}
+            <p class="text-muted">{% trans 'Be the first to create an announcement!' %}</p>
+            <a href="{% url 'announcement_add' %}" class="btn btn-primary mt-2">
+                <i class="fas fa-plus"></i> {% trans 'Create Announcement' %}
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock content %}

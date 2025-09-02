@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load core_extras %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="m-0">{{ batch.title }} - {% trans 'Timetable' %}</h4>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'comprehensive_timetable' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>{% trans 'Back to All Batches' %}
+                            </a>
+                            <form method="POST" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="generate">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-sync-alt me-1"></i>{% trans 'Regenerate Timetable' %}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Batch Info -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <h6>{% trans 'Batch Information' %}</h6>
+                                <p class="mb-1"><strong>{% trans 'Batch:' %}</strong> {{ batch.title }}</p>
+                                <p class="mb-1"><strong>{% trans 'Program:' %}</strong> {{ batch.program.title }}</p>
+                                <p class="mb-0"><strong>{% trans 'Total Slots:' %}</strong> 
+                                    {% if timetable_data %}
+                                        {% with total_slots=0 %}
+                                            {% for day_data in timetable_data.values %}
+                                                {% for slot in day_data %}
+                                                    {% with total_slots=total_slots|add:1 %}{% endwith %}
+                                                {% endfor %}
+                                            {% endfor %}
+                                            {{ total_slots }}
+                                        {% endwith %}
+                                    {% else %}
+                                        0
+                                    {% endif %}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timetable Display -->
+                    {% if timetable_data %}
+                    <div class="row">
+                        <div class="col-12">
+                            <h5>{% trans 'Weekly Timetable' %}</h5>
+                            <div class="table-responsive">
+                                <table class="table table-bordered table-striped">
+                                    <thead class="table-dark">
+                                        <tr>
+                                            <th>{% trans 'Time' %}</th>
+                                            <th>{% trans 'Monday' %}</th>
+                                            <th>{% trans 'Tuesday' %}</th>
+                                            <th>{% trans 'Wednesday' %}</th>
+                                            <th>{% trans 'Thursday' %}</th>
+                                            <th>{% trans 'Friday' %}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for time_slot in "01234567" %}
+                                        <tr>
+                                            <td class="fw-bold bg-light">
+                                                {% if time_slot == "0" %}09:30 - 10:15{% endif %}
+                                                {% if time_slot == "1" %}10:15 - 11:00{% endif %}
+                                                {% if time_slot == "2" %}11:15 - 12:00{% endif %}
+                                                {% if time_slot == "3" %}12:00 - 12:45{% endif %}
+                                                {% if time_slot == "4" %}13:30 - 14:15{% endif %}
+                                                {% if time_slot == "5" %}14:15 - 15:00{% endif %}
+                                                {% if time_slot == "6" %}15:00 - 15:45{% endif %}
+                                                {% if time_slot == "7" %}15:45 - 16:15{% endif %}
+                                            </td>
+                                            {% for day in "01234" %}
+                                            <td class="text-center">
+                                                {% for slot in timetable_data|get_item:day %}
+                                                    {% if slot.start_time|time:"H:i" == "09:30" and time_slot == "0" %}
+                                                        <div class="p-2 border rounded bg-primary text-white">
+                                                            <strong>{{ slot.offering.course.title }}</strong><br>
+                                                            <small>{{ slot.offering.lecturer.get_full_name }}</small><br>
+                                                            <small>{{ slot.classroom.name }}</small>
+                                                        </div>
+                                                    {% elif slot.start_time|time:"H:i" == "10:15" and time_slot == "1" %}
+                                                        <div class="p-2 border rounded bg-success text-white">
+                                                            <strong>{{ slot.offering.course.title }}</strong><br>
+                                                            <small>{{ slot.offering.lecturer.get_full_name }}</small><br>
+                                                            <small>{{ slot.classroom.name }}</small>
+                                                        </div>
+                                                    {% elif slot.start_time|time:"H:i" == "11:15" and time_slot == "2" %}
+                                                        <div class="p-2 border rounded bg-warning text-dark">
+                                                            <strong>{{ slot.offering.course.title }}</strong><br>
+                                                            <small>{{ slot.offering.lecturer.get_full_name }}</small><br>
+                                                            <small>{{ slot.classroom.name }}</small>
+                                                        </div>
+                                                    {% elif slot.start_time|time:"H:i" == "12:00" and time_slot == "3" %}
+                                                        <div class="p-2 border rounded bg-info text-white">
+                                                            <strong>{{ slot.offering.course.title }}</strong><br>
+                                                            <small>{{ slot.offering.lecturer.get_full_name }}</small><br>
+                                                            <small>{{ slot.classroom.name }}</small>
+                                                        </div>
+                                                    {% elif slot.start_time|time:"H:i" == "13:30" and time_slot == "4" %}
+                                                        <div class="p-2 border rounded bg-secondary text-white">
+                                                            <strong>{{ slot.offering.course.title }}</strong><br>
+                                                            <small>{{ slot.offering.lecturer.get_full_name }}</small><br>
+                                                            <small>{{ slot.classroom.name }}</small>
+                                                        </div>
+                                                    {% elif slot.start_time|time:"H:i" == "14:15" and time_slot == "5" %}
+                                                        <div class="p-2 border rounded bg-dark text-white">
+                                                            <strong>{{ slot.offering.course.title }}</strong><br>
+                                                            <small>{{ slot.offering.lecturer.get_full_name }}</small><br>
+                                                            <small>{{ slot.classroom.name }}</small>
+                                                        </div>
+                                                    {% elif slot.start_time|time:"H:i" == "15:00" and time_slot == "6" %}
+                                                        <div class="p-2 border rounded bg-danger text-white">
+                                                            <strong>{{ slot.offering.course.title }}</strong><br>
+                                                            <small>{{ slot.offering.lecturer.get_full_name }}</small><br>
+                                                            <small>{{ slot.classroom.name }}</small>
+                                                        </div>
+                                                    {% elif slot.start_time|time:"H:i" == "15:45" and time_slot == "7" %}
+                                                        <div class="p-2 border rounded bg-light text-dark">
+                                                            <strong>{{ slot.offering.course.title }}</strong><br>
+                                                            <small>{{ slot.offering.lecturer.get_full_name }}</small><br>
+                                                            <small>{{ slot.classroom.name }}</small>
+                                                        </div>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </td>
+                                            {% endfor %}
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detailed List -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5>{% trans 'Detailed Schedule' %}</h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>{% trans 'Day' %}</th>
+                                            <th>{% trans 'Time' %}</th>
+                                            <th>{% trans 'Course' %}</th>
+                                            <th>{% trans 'Lecturer' %}</th>
+                                            <th>{% trans 'Classroom' %}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for day_num, day_slots in timetable_data.items %}
+                                            {% for slot in day_slots %}
+                                            <tr>
+                                                <td>{{ slot.get_day_display }}</td>
+                                                <td>{{ slot.start_time }} - {{ slot.end_time }}</td>
+                                                <td>{{ slot.offering.course.title }}</td>
+                                                <td>{{ slot.offering.lecturer.get_full_name }}</td>
+                                                <td>{{ slot.classroom.name }}</td>
+                                            </tr>
+                                            {% endfor %}
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-warning text-center">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                {% trans 'No timetable data available for this batch. Click "Regenerate Timetable" to create one.' %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

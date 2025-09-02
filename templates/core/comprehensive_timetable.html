@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="m-0">{% trans 'Comprehensive Timetable Management' %}</h4>
+                        <div class="d-flex gap-2">
+                            <form method="POST" class="d-inline">
+                                {% csrf_token %}
+                                <input type="hidden" name="action" value="generate_all">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-magic me-1"></i>{% trans 'Generate All Timetables' %}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Batches Overview -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h5>{% trans 'Batches Overview' %}</h5>
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>{% trans 'Batch' %}</th>
+                                            <th>{% trans 'Program' %}</th>
+                                            <th>{% trans 'Timetable Status' %}</th>
+                                            <th>{% trans 'Slots' %}</th>
+                                            <th>{% trans 'Actions' %}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for batch in batches %}
+                                        <tr>
+                                            <td>{{ batch.title }}</td>
+                                            <td>{{ batch.program }}</td>
+                                            <td>
+                                                {% if batch.has_timetable %}
+                                                    <span class="badge bg-success">{% trans 'Generated' %}</span>
+                                                {% else %}
+                                                    <span class="badge bg-warning">{% trans 'Not Generated' %}</span>
+                                                {% endif %}
+                                            </td>
+                                            <td>{{ batch.slot_count }}</td>
+                                            <td>
+                                                <a href="{% url 'batch_timetable' batch.id %}" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-eye me-1"></i>{% trans 'View' %}
+                                                </a>
+                                                {% if not batch.has_timetable %}
+                                                <form method="POST" class="d-inline">
+                                                    {% csrf_token %}
+                                                    <input type="hidden" name="action" value="generate_batch">
+                                                    <input type="hidden" name="batch_id" value="{{ batch.id }}">
+                                                    <button type="submit" class="btn btn-sm btn-success">
+                                                        <i class="fas fa-plus me-1"></i>{% trans 'Generate' %}
+                                                    </button>
+                                                </form>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr>
+                                            <td colspan="5" class="text-center">{% trans 'No batches found.' %}</td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timetable Display -->
+                    {% if timetable_data %}
+                    <div class="row">
+                        <div class="col-12">
+                            <h5>{% trans 'Generated Timetables' %}</h5>
+                            {% for batch_name, days_data in timetable_data.items %}
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h6 class="m-0">{{ batch_name }}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-sm">
+                                            <thead>
+                                                <tr>
+                                                    <th>{% trans 'Day' %}</th>
+                                                    <th>{% trans 'Time' %}</th>
+                                                    <th>{% trans 'Course' %}</th>
+                                                    <th>{% trans 'Lecturer' %}</th>
+                                                    <th>{% trans 'Classroom' %}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for day_num, slots in days_data.items %}
+                                                    {% for slot in slots %}
+                                                    <tr>
+                                                        <td>
+                                                            {% if day_num == "0" %}Monday{% endif %}
+                                                            {% if day_num == "1" %}Tuesday{% endif %}
+                                                            {% if day_num == "2" %}Wednesday{% endif %}
+                                                            {% if day_num == "3" %}Thursday{% endif %}
+                                                            {% if day_num == "4" %}Friday{% endif %}
+                                                        </td>
+                                                        <td>{{ slot.start_time|time:"H:i" }} - {{ slot.end_time|time:"H:i" }}</td>
+                                                        <td>{{ slot.course }}</td>
+                                                        <td>{{ slot.lecturer }}</td>
+                                                        <td>{{ slot.classroom }}</td>
+                                                    </tr>
+                                                    {% endfor %}
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

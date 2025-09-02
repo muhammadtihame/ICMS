@@ -1,0 +1,69 @@
+{% load static %}
+{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <title>{% block title %}KCET College Management System{% endblock title %}</title>
+
+    	<link rel="shortcut icon" href="{% static 'img/brand.png' %}?v={{ timestamp }}" type="image/x-icon">
+
+    <!-- Fontawesome icons -->
+    <link rel="stylesheet" type="text/css" href="{% static 'vendor/fontawesome-6.5.1/css/all.min.css' %}">
+
+    <!-- Bootstrap5 -->
+    <link rel="stylesheet" type="text/css" href="{% static 'vendor/bootstrap-5.3.2/css/bootstrap.min.css' %}">
+
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.min.css' %}?v={{ timestamp }}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/custom.css' %}?v={{ timestamp }}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/announcement_ticker.css' %}?v={{ timestamp }}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/universal-search.css' %}?v={{ timestamp }}">
+
+    <!-- <script src="https://js.stripe.com/v3/"></script> -->
+    {% block header %}{% endblock %}
+</head>
+
+<body>
+    {% block sidebar %}
+        {% include 'sidebar.html' %}
+    {% endblock %}
+
+    {% block maincontent %}
+    <div id="main">
+        {% block topbar %}
+            {% include 'navbar.html' %}
+        {% endblock %}
+
+        <div class="container-fluid" id="main-content">
+            <div class="row">
+                <div class="col-12">
+                    {% block content %}{% endblock content %}
+                </div>
+            </div>
+        </div>
+
+    </div>
+    {% endblock %}
+    <script src="{% url 'javascript-catalog' %}"></script>
+    <script type="text/javascript" src="{% static 'vendor/jquery-3.7.1/jquery-3.7.1.min.js' %}?v={{ timestamp }}"></script>
+    <script type="text/javascript" src="{% static 'vendor/bootstrap-5.3.2/js/bootstrap.bundle.min.js' %}?v={{ timestamp }}"></script>
+
+    <!-- Universal Search Component -->
+    <script type="text/javascript" src="{% static 'js/universal-search.js' %}?v={{ timestamp }}"></script>
+
+    <script type="text/javascript" src="{% static 'js/main.js' %}?v={{ timestamp }}"></script>
+
+    {% block js %}
+    {% endblock js %}
+    
+    <!-- Creator Tag -->
+    <div style="position: fixed; bottom: 10px; right: 10px; background: rgba(0,0,0,0.8); color: white; padding: 5px 10px; border-radius: 5px; font-size: 12px; z-index: 9999;">
+        CREATED BY MOHAMMAD TIHAME
+    </div>
+</body>
+
+</html>

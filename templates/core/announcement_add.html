@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %} {% if announcement %} {% trans 'Edit Announcement' %} {% else %} {% trans 'Add Announcement' %} {% endif %} | {% trans 'Learning management system' %} {% endblock title %}
+{% load static %}
+
+{% block content %}
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">{% trans 'Home' %}</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'announcement_list' %}">{% trans 'Announcements' %}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">
+          {% if announcement %} {% trans 'Edit Announcement' %} {% else %} {% trans 'Add Announcement' %} {% endif %}
+      </li>
+    </ol>
+</nav>
+
+{% include 'snippets/messages.html' %}
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="card-title">
+            {% if announcement %} {% trans 'Edit Announcement' %} {% else %} {% trans 'Add New Announcement' %} {% endif %}
+        </h5>
+    </div>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <label for="title" class="form-label">{% trans 'Title' %}</label>
+                <input type="text" class="form-control" id="title" name="title" 
+                       value="{{ announcement.title|default:'' }}" required
+                       placeholder="{% trans 'Enter announcement title' %}">
+            </div>
+            <div class="mb-3">
+                <label for="content" class="form-label">{% trans 'Content' %}</label>
+                <textarea class="form-control" id="content" name="content" rows="5" required
+                          placeholder="{% trans 'Enter announcement content' %}">{{ announcement.content|default:'' }}</textarea>
+            </div>
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">
+                    {% if announcement %} {% trans 'Update Announcement' %} {% else %} {% trans 'Create Announcement' %} {% endif %}
+                </button>
+                <a href="{% url 'announcement_list' %}" class="btn btn-secondary">{% trans 'Cancel' %}</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock content %}

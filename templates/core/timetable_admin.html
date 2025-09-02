@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Timetable' %} | LMS{% endblock title %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h5 class="m-0">{% trans 'Timetable (Admin)' %}</h5>
+
+  <!-- Day Selection and Generate Form -->
+  <div class="d-flex align-items-center gap-2">
+    <a href="{% url 'comprehensive_timetable' %}" class="btn btn-sm btn-info">
+      <i class="fas fa-calendar-alt me-1"></i>{% trans 'Comprehensive Timetable' %}
+    </a>
+    <form method="GET" action="{% url 'timetable_admin' %}" class="d-flex align-items-center gap-2">
+      <label for="day" class="form-label mb-0">{% trans 'Select Day:' %}</label>
+      <select name="day" id="day" class="form-select form-select-sm" style="width: auto;" onchange="this.form.submit()">
+        {% for day_value, day_name in day_choices %}
+          <option value="{{ day_value }}" {% if day_value == selected_day %}selected{% endif %}>
+            {{ day_name }}
+          </option>
+        {% endfor %}
+      </select>
+    </form>
+
+    <form method="POST" action="{% url 'timetable_regenerate' %}" class="d-flex align-items-center gap-2">
+      {% csrf_token %}
+      <input type="hidden" name="day" value="{{ selected_day }}">
+      <button type="submit" class="btn btn-sm btn-primary">
+        <i class="fas fa-sync-alt me-1"></i>{% trans 'Generate Timetable' %}
+      </button>
+    </form>
+  </div>
+</div>
+
+<div class="table-responsive table-shadow table-light table-striped m-0 mt-2">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Start</th>
+        <th>End</th>
+        <th>Program</th>
+        <th>Course</th>
+        <th>Batch</th>
+        <th>Lecturer</th>
+        <th>Room</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for slot in slots %}
+      <tr>
+        <td>{{ slot.start_time }}</td>
+        <td>{{ slot.end_time }}</td>
+        <td>{{ slot.offering.program.title }}</td>
+        <td>{{ slot.offering.course.title }}</td>
+        <td>{{ slot.offering.batch.title }}</td>
+        <td>{{ slot.offering.lecturer.get_full_name }}</td>
+        <td>{{ slot.classroom.name }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="7" class="text-center text-muted">
+        No slots for this day. Click "Generate Timetable" to create slots.
+      </td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock content %}
+
+

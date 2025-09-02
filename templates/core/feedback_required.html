@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% load static %}
+
+{% block title %}{% trans 'Feedback Required' %} | {% trans 'Learning management system' %}{% endblock title %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3 class="mb-0">
+                        <i class="fas fa-star text-warning me-2"></i>
+                        {% trans 'Mandatory Teacher Feedback Required' %}
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <div class="alert alert-warning text-center mb-4">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <strong>{% trans 'Important Notice:' %}</strong>
+                        {% trans 'You must provide feedback for all your teachers before you can access any other features. This helps us improve the quality of education.' %}
+                    </div>
+
+                    {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            {{ error }}
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+
+                    <form method="post" id="feedbackForm">
+                        {% csrf_token %}
+                        
+                        {% for lecturer in lecturers %}
+                        <div class="lecturer-feedback-section mb-4 p-3 border rounded">
+                            <div class="lecturer-header mb-3">
+                                <h5 class="text-primary mb-2">
+                                    <i class="fas fa-user-tie me-2"></i>
+                                    {{ lecturer.get_full_name }}
+                                </h5>
+                                <p class="text-muted mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    {% trans 'Please rate this teacher and provide improvement suggestions' %}
+                                </p>
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="id_rating_{{ lecturer.id }}" class="form-label fw-bold text-danger">
+                                            {% trans 'Rating' %} *
+                                        </label>
+                                        <select name="rating_{{ lecturer.id }}" id="id_rating_{{ lecturer.id }}" 
+                                                class="form-control rating-select" required>
+                                            <option value="">{% trans 'Select rating' %}</option>
+                                            <option value="1">1 ★</option>
+                                            <option value="2">2 ★★</option>
+                                            <option value="3">3 ★★★</option>
+                                            <option value="4">4 ★★★★</option>
+                                            <option value="5">5 ★★★★★</option>
+                                        </select>
+                                        <div class="star-display mt-2" id="star_display_{{ lecturer.id }}"></div>
+                                        {% if form.rating_1.errors %}
+                                            <div class="text-danger small">{{ form.rating_1.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label for="id_message_{{ lecturer.id }}" class="form-label fw-bold text-danger">
+                                            {% trans 'Improvement Suggestions' %} *
+                                        </label>
+                                        <textarea 
+                                            name="message_{{ lecturer.id }}" 
+                                            id="id_message_{{ lecturer.id }}" 
+                                            class="form-control" 
+                                            rows="3" 
+                                            placeholder="{% trans 'Please share your suggestions for improvement...' %}"
+                                            required
+                                        ></textarea>
+                                        {% if form.message_1.errors %}
+                                            <div class="text-danger small">{{ form.message_1.errors.0 }}</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+
+                        <div class="submit-section text-center">
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>{% trans 'Note:' %}</strong> 
+                                {% trans 'All fields marked with * are required. You cannot proceed without completing this feedback.' %}
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary btn-lg px-5" id="submitBtn">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                {% trans 'Submit Feedback & Continue' %}
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.lecturer-feedback-section {
+    background: #f8f9fa;
+    transition: all 0.3s ease;
+}
+
+.lecturer-feedback-section:hover {
+    background: #e9ecef;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.star-display {
+    font-size: 18px;
+    color: #ffc107;
+}
+
+.rating-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, #007bff, #0056b3);
+    border: none;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,123,255,0.4);
+}
+
+.alert-warning {
+    background: linear-gradient(45deg, #fff3cd, #ffeaa7);
+    border: 1px solid #ffc107;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('feedbackForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    // Show stars when rating is selected
+    document.querySelectorAll('.rating-select').forEach(select => {
+        select.addEventListener('change', function() {
+            const rating = this.value;
+            const starDisplay = document.getElementById('star_display_' + this.name.split('_')[1]);
+            if (rating) {
+                starDisplay.innerHTML = '★'.repeat(rating);
+            } else {
+                starDisplay.innerHTML = '';
+            }
+        });
+    });
+    
+    // Form validation
+    form.addEventListener('submit', function(e) {
+        const ratingSelects = document.querySelectorAll('.rating-select');
+        const messageTextareas = document.querySelectorAll('textarea[name^="message_"]');
+        let allFieldsCompleted = true;
+        
+        // Check all rating fields
+        ratingSelects.forEach(select => {
+            if (!select.value) {
+                allFieldsCompleted = false;
+                select.style.borderColor = '#dc3545';
+                select.classList.add('is-invalid');
+            } else {
+                select.style.borderColor = '';
+                select.classList.remove('is-invalid');
+            }
+        });
+        
+        // Check all message fields
+        messageTextareas.forEach(textarea => {
+            if (!textarea.value.trim()) {
+                allFieldsCompleted = false;
+                textarea.style.borderColor = '#dc3545';
+                textarea.classList.add('is-invalid');
+            } else {
+                textarea.style.borderColor = '';
+                textarea.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!allFieldsCompleted) {
+            e.preventDefault();
+            alert('{% trans "Please complete ALL fields (rating and suggestions) for every teacher before submitting." %}');
+            return false;
+        }
+        
+        // Disable submit button to prevent double submission
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{% trans "Submitting..." %}';
+    });
+    
+    // Prevent navigation away from page
+    window.addEventListener('beforeunload', function(e) {
+        e.preventDefault();
+        e.returnValue = '';
+    });
+    
+    // Prevent back button
+    history.pushState(null, null, location.href);
+    window.onpopstate = function() {
+        history.go(1);
+    };
+});
+</script>
+{% endblock content %}

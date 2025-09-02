@@ -1,0 +1,233 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="m-0">{% trans 'Attendance Reports' %}</h4>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'admin_attendance' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>{% trans 'Back to Admin' %}
+                            </a>
+                            <button onclick="window.print()" class="btn btn-outline-dark">
+                                <i class="fas fa-print me-1"></i>{% trans 'Print Report' %}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Date Range Info -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-calendar me-1"></i>{% trans 'Report Period' %}</h6>
+                                <p class="mb-0"><strong>{% trans 'From:' %}</strong> {{ start_date }} <strong>{% trans 'To:' %}</strong> {{ end_date }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overall Statistics -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Overall Statistics' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <h4 class="text-primary">{{ total_attendance_records }}</h4>
+                                                <p class="text-muted">{% trans 'Total Attendance Records' %}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <h4 class="text-success">{{ total_sessions }}</h4>
+                                                <p class="text-muted">{% trans 'Total Sessions Conducted' %}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <h4 class="text-info">{{ working_days }}</h4>
+                                                <p class="text-muted">{% trans 'Working Days' %}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <h4 class="text-warning">
+                                                    {% if total_sessions > 0 %}
+                                                        {% widthratio total_sessions working_days 100 %}%
+                                                    {% else %}
+                                                        0%
+                                                    {% endif %}
+                                                </h4>
+                                                <p class="text-muted">{% trans 'Session Coverage' %}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Course-wise Attendance -->
+                    {% if course_attendance %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Course-wise Attendance Summary' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>{% trans 'Course' %}</th>
+                                                    <th>{% trans 'Total Sessions' %}</th>
+                                                    <th>{% trans 'Total Students' %}</th>
+                                                    <th>{% trans 'Present Students' %}</th>
+                                                    <th>{% trans 'Attendance %' %}</th>
+                                                    <th>{% trans 'Status' %}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for course_name, stats in course_attendance.items %}
+                                                <tr>
+                                                    <td>{{ course_name }}</td>
+                                                    <td>{{ stats.total_sessions }}</td>
+                                                    <td>{{ stats.total_students }}</td>
+                                                    <td>{{ stats.total_present }}</td>
+                                                    <td>
+                                                        <span class="badge {% if stats.percentage >= 75 %}bg-success{% elif stats.percentage >= 60 %}bg-warning{% else %}bg-danger{% endif %}">
+                                                            {{ stats.percentage|floatformat:1 }}%
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        {% if stats.percentage >= 75 %}
+                                                            <span class="text-success"><i class="fas fa-check-circle me-1"></i>{% trans 'Good' %}</span>
+                                                        {% elif stats.percentage >= 60 %}
+                                                            <span class="text-warning"><i class="fas fa-exclamation-circle me-1"></i>{% trans 'Moderate' %}</span>
+                                                        {% else %}
+                                                            <span class="text-danger"><i class="fas fa-times-circle me-1"></i>{% trans 'Low' %}</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Attendance Trends -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Attendance Trends' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6>{% trans 'Attendance Distribution' %}</h6>
+                                            <div class="progress mb-3">
+                                                <div class="progress-bar bg-success" style="width: 75%">75%+</div>
+                                            </div>
+                                            <div class="progress mb-3">
+                                                <div class="progress-bar bg-warning" style="width: 15%">60-75%</div>
+                                            </div>
+                                            <div class="progress mb-3">
+                                                <div class="progress-bar bg-danger" style="width: 10%">&lt;60%</div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6>{% trans 'Key Insights' %}</h6>
+                                            <ul class="list-unstyled">
+                                                <li><i class="fas fa-chart-line text-primary me-2"></i>{% trans 'Overall attendance trend analysis' %}</li>
+                                                <li><i class="fas fa-calendar-check text-success me-2"></i>{% trans 'Session completion rate' %}</li>
+                                                <li><i class="fas fa-exclamation-triangle text-warning me-2"></i>{% trans 'Courses needing attention' %}</li>
+                                                <li><i class="fas fa-users text-info me-2"></i>{% trans 'Student engagement levels' %}</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Quick Actions' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <a href="{% url 'detention_list' %}" class="btn btn-outline-warning w-100 mb-2">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>{% trans 'Detention List' %}
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <a href="{% url 'admin_attendance' %}" class="btn btn-outline-primary w-100 mb-2">
+                                                <i class="fas fa-search me-1"></i>{% trans 'Search Students' %}
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <a href="{% url 'comprehensive_timetable' %}" class="btn btn-outline-info w-100 mb-2">
+                                                <i class="fas fa-calendar-alt me-1"></i>{% trans 'Timetable' %}
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <a href="{% url 'attendance_reports' %}" class="btn btn-outline-secondary w-100 mb-2">
+                                                <i class="fas fa-refresh me-1"></i>{% trans 'Refresh' %}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+@media print {
+    .btn, .card-header .d-flex {
+        display: none !important;
+    }
+    .card {
+        border: none !important;
+        box-shadow: none !important;
+    }
+    .card-header {
+        background: none !important;
+        border-bottom: 2px solid #000 !important;
+    }
+}
+</style>
+{% endblock %}

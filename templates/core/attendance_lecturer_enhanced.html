@@ -1,0 +1,311 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid attendance-lecturer-container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="m-0">{% trans 'Enhanced Attendance Management' %}</h4>
+                        <div class="d-flex gap-2 action-buttons">
+                            <a href="{% url 'attendance_dashboard' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>{% trans 'Back to Dashboard' %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Course Overview -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'My Assigned Courses & Enrolled Students' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    {% if course_summaries %}
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>{% trans 'Course' %}</th>
+                                                    <th>{% trans 'Program' %}</th>
+                                                    <th>{% trans 'Batch' %}</th>
+                                                    <th>{% trans 'Enrolled Students' %}</th>
+                                                    <th>{% trans 'Today\'s Attendance' %}</th>
+                                                    <th>{% trans 'Actions' %}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for summary in course_summaries %}
+                                                <tr>
+                                                    <td>{{ summary.course }}</td>
+                                                    <td>{{ summary.batch }}</td>
+                                                    <td>{{ summary.batch }}</td>
+                                                    <td>
+                                                        <span class="badge bg-primary">{{ summary.total_enrolled }}</span>
+                                                    </td>
+                                                    <td>
+                                                        {% if summary.attendance_records %}
+                                                            <span class="badge bg-success">{{ summary.present_count }}</span> / 
+                                                            <span class="badge bg-danger">{{ summary.absent_count }}</span>
+                                                            <br><small class="text-muted">{{ summary.attendance_percentage }}%</small>
+                                                        {% else %}
+                                                            <span class="badge bg-warning">{% trans 'Not Marked' %}</span>
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>
+                                                        <div class="action-buttons">
+                                                            <button class="btn btn-sm btn-primary" onclick="selectCourse('{{ summary.course }}')">
+                                                                <i class="fas fa-edit me-1"></i>{% trans 'Mark Attendance' %}
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        {% trans 'No courses assigned to you yet.' %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Mark Attendance Form -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Mark Attendance' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form method="POST" id="attendanceForm">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="mark_attendance">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="{{ form.course_offering.id_for_label }}" class="form-label">{% trans 'Course' %}</label>
+                                                    {{ form.course_offering }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="mb-3">
+                                                    <label for="{{ form.date.id_for_label }}" class="form-label">{% trans 'Date' %}</label>
+                                                    {{ form.date }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Student Search -->
+                                        <div class="mb-3">
+                                            <label for="{{ form.student_search.id_for_label }}" class="form-label">{% trans 'Search Students' %}</label>
+                                            <div class="input-group">
+                                                {{ form.student_search }}
+                                                <button type="button" class="btn btn-outline-secondary" onclick="searchStudents()">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                            <small class="form-text text-muted">{% trans 'Search by name, ID, or email to filter students' %}</small>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label class="form-label">{% trans 'Present Students' %}</label>
+                                            <div class="row" id="studentsList">
+                                                {% for student in form.present_students %}
+                                                <div class="col-md-4 mb-2">
+                                                    <div class="form-check">
+                                                        {{ student }}
+                                                        <label class="form-check-label" for="{{ student.id_for_label }}">
+                                                            {{ student.choice_label }}
+                                                        </label>
+                                                    </div>
+                                                </div>
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="{{ form.notes.id_for_label }}" class="form-label">{% trans 'Notes' %}</label>
+                                            {{ form.notes }}
+                                        </div>
+                                        
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-save me-1"></i>{% trans 'Mark Attendance' %}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attendance Percentage Calculator -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Attendance Percentage Calculator' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form method="POST">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="calculate_percentage">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="mb-3">
+                                                    <label for="{{ percentage_form.student.id_for_label }}" class="form-label">{% trans 'Student' %}</label>
+                                                    {{ percentage_form.student }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="mb-3">
+                                                    <label for="{{ percentage_form.course_offering.id_for_label }}" class="form-label">{% trans 'Course' %}</label>
+                                                    {{ percentage_form.course_offering }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="mb-3">
+                                                    <label for="{{ percentage_form.start_date.id_for_label }}" class="form-label">{% trans 'Start Date' %}</label>
+                                                    {{ percentage_form.start_date }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="mb-3">
+                                                    <label for="{{ percentage_form.end_date.id_for_label }}" class="form-label">{% trans 'End Date' %}</label>
+                                                    {{ percentage_form.end_date }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-info">
+                                            <i class="fas fa-calculator me-1"></i>{% trans 'Calculate Percentage' %}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Attendance Sessions -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Recent Attendance Sessions' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    {% if recent_sessions %}
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>{% trans 'Date' %}</th>
+                                                    <th>{% trans 'Course' %}</th>
+                                                    <th>{% trans 'Batch' %}</th>
+                                                    <th>{% trans 'Attendance' %}</th>
+                                                    <th>{% trans 'Percentage' %}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for session in recent_sessions %}
+                                                <tr>
+                                                    <td>{{ session.date }}</td>
+                                                    <td>{{ session.course_offering.course.title }}</td>
+                                                    <td>{{ session.course_offering.batch.title }}</td>
+                                                    <td>
+                                                        <span class="badge bg-success">{{ session.present_students }}</span> / 
+                                                        <span class="badge bg-secondary">{{ session.total_students }}</span>
+                                                    </td>
+                                                    <td>
+                                                        {% if session.total_students > 0 %}
+                                                            <span class="badge bg-info">
+                                                                {{ session.present_students|floatformat:0 }}%
+                                                            </span>
+                                                        {% else %}
+                                                            <span class="badge bg-warning">0%</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    {% else %}
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        {% trans 'No recent attendance sessions found.' %}
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function selectCourse(courseName) {
+    // Auto-select the course in the dropdown
+    const courseSelect = document.getElementById('{{ form.course_offering.id_for_label }}');
+    for (let option of courseSelect.options) {
+        if (option.text.includes(courseName)) {
+            courseSelect.value = option.value;
+            break;
+        }
+    }
+    
+    // Scroll to the attendance form
+    document.getElementById('attendanceForm').scrollIntoView({ behavior: 'smooth' });
+}
+
+function searchStudents() {
+    const searchQuery = document.getElementById('{{ form.student_search.id_for_label }}').value;
+    const studentCheckboxes = document.querySelectorAll('#studentsList input[type="checkbox"]');
+    
+    studentCheckboxes.forEach(checkbox => {
+        const label = checkbox.nextElementSibling;
+        const studentName = label.textContent.toLowerCase();
+        
+        if (searchQuery === '' || studentName.includes(searchQuery.toLowerCase())) {
+            checkbox.parentElement.style.display = 'block';
+        } else {
+            checkbox.parentElement.style.display = 'none';
+        }
+    });
+}
+
+// Auto-search as user types
+document.getElementById('{{ form.student_search.id_for_label }}').addEventListener('input', searchStudents);
+
+// Auto-update student list when course changes
+document.getElementById('{{ form.course_offering.id_for_label }}').addEventListener('change', function() {
+    // This would typically make an AJAX call to get students for the selected course
+    // For now, we'll just show all students
+    const studentCheckboxes = document.querySelectorAll('#studentsList input[type="checkbox"]');
+    studentCheckboxes.forEach(checkbox => {
+        checkbox.parentElement.style.display = 'block';
+    });
+});
+</script>
+{% endblock %}

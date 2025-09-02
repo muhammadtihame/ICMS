@@ -1,0 +1,143 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{{ title }} | {% trans 'Learning management system' %}{% endblock title %}
+{% load static %}
+
+{% block content %}
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item active" aria-current="page">{% trans 'Home' %}</li>
+    </ol>
+</nav>
+
+{# Removed the Add New Post button as requested #}
+
+{% include 'snippets/messages.html' %}
+
+<!-- News & Events Section -->
+<div>
+    <div class="title-1">{% trans 'News' %} &amp; {% trans 'Events' %}</div>
+</div>
+
+<div class="col-md-2 ms-auto d-flex">
+    <div class="me-3">
+        <span class="color-indicator bg-primary"></span> {% trans 'News' %}
+    </div>
+    <div>
+        <span class="color-indicator bg-purple"></span> {% trans 'Events' %}
+    </div>
+</div>
+
+<div class="container-fluid">
+    {% if items %}
+    <div class="row">
+        {% for item in items %}
+        <div class="col-md-4 mb-4">
+            <div class="bg-white border">
+                <div class="card-header-ne {% if item.posted_as == 'News' %}{% trans 'news' %}{% else %}{% trans 'events' %}{% endif %} p-2">
+                    <span class="p-0">
+                        {{ item.title|title }}
+                    </span>
+                    {% if can_edit_news %}
+                    <div class="dropstart">
+                        <button class="btn btn-sm" data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-ellipsis-v text-white"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" href="{% url 'edit_post' pk=item.id %}"><i
+                                    class="unstyled me-2 fas fa-pencil-alt"></i>{% trans 'Edit' %}</a>
+                            <a class="dropdown-item" href="{% url 'delete_post' pk=item.id %}"><i
+                                    class="unstyled me-2 fas fa-trash-alt"></i>{% trans 'Delete' %}</a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <div class="p-2 my-2" style="min-height: 120px;">{{ item.summary }}</div>
+
+                <div class="bg-light p-1 small text-secondary text-end pe-3">
+                    <i class="fa fa-calendar small unstyled"></i>
+                    {{ item.updated_date|timesince }} {% trans 'ago' %}
+                </div>
+
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <h4 class="text-center mt-5 py-5 text-muted">
+        <i class="fa-regular fa-folder-open me-2"></i>{% trans 'School news and events will appear here.' %}
+    </h4>
+
+    {% endif %}
+
+</div>
+
+<!-- Announcements Section -->
+<div class="mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="title-1">{% trans 'Announcements' %}</h2>
+        {% if can_edit_announcements %}
+        <a href="{% url 'announcement_add' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> {% trans 'Add Announcement' %}
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            {% if announcements %}
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>{% trans 'Title' %}</th>
+                            <th>{% trans 'Content' %}</th>
+                            <th>{% trans 'Posted By' %}</th>
+                            <th>{% trans 'Created At' %}</th>
+                            {% if can_edit_announcements %}
+                            <th>{% trans 'Actions' %}</th>
+                            {% endif %}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for announcement in announcements %}
+                        <tr>
+                            <td>{{ announcement.title }}</td>
+                            <td>{{ announcement.content|truncatewords:20 }}</td>
+                            <td>{{ announcement.created_by.get_full_name|default:announcement.created_by.username }}</td>
+                            <td>{{ announcement.created_at|date:"M d, Y H:i" }}</td>
+                            {% if can_edit_announcements %}
+                            <td>
+                                <a href="{% url 'announcement_edit' announcement.pk %}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-edit"></i> {% trans 'Edit' %}
+                                </a>
+                                <a href="{% url 'announcement_delete' announcement.pk %}" class="btn btn-sm btn-outline-danger">
+                                    <i class="fas fa-trash"></i> {% trans 'Delete' %}
+                                </a>
+                            </td>
+                            {% endif %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="text-center py-5">
+                <i class="fas fa-bullhorn fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">{% trans 'No announcements yet' %}</h5>
+                {% if can_edit_announcements %}
+                <p class="text-muted">{% trans 'Be the first to create an announcement!' %}</p>
+                <a href="{% url 'announcement_add' %}" class="btn btn-primary mt-2">
+                    <i class="fas fa-plus"></i> {% trans 'Create Announcement' %}
+                </a>
+                {% endif %}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Universal Search Demo{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-search me-2"></i>
+                        Universal Search System Demo
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>🎯 Features:</strong> Case-insensitive search, handles spaces/dots, real-time suggestions, 
+                        keyboard navigation, and works across all content types (students, lecturers, courses, news, etc.)
+                    </div>
+
+                    <h5 class="mb-3">1. Main Navigation Search Bar</h5>
+                    <p class="text-muted mb-3">This search bar already has universal search enabled. Try searching for:</p>
+                    <ul class="text-muted mb-4">
+                        <li>Student names: "john", "student", "test"</li>
+                        <li>Lecturer names: "dr", "aneesa", "prince"</li>
+                        <li>Course codes: "CS", "AI", "programming"</li>
+                        <li>News keywords: "event", "announcement"</li>
+                    </ul>
+
+                    <h5 class="mb-3">2. Custom Search Bar Example</h5>
+                    <p class="text-muted mb-3">Add this to any page to enable universal search:</p>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="custom-search">Custom Search Input</label>
+                                <input type="text" 
+                                       id="custom-search" 
+                                       class="form-control" 
+                                       data-universal-search="true"
+                                       placeholder="Search students, lecturers, courses...">
+                                <small class="form-text text-muted">
+                                    Add <code>data-universal-search="true"</code> to any input to enable suggestions
+                                </small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="another-search">Another Search Input</label>
+                                <input type="text" 
+                                       id="another-search" 
+                                       class="form-control" 
+                                       data-universal-search="true"
+                                       placeholder="Try searching here too...">
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3">3. Implementation Guide</h5>
+                    <div class="bg-light p-3 rounded">
+                        <h6>HTML:</h6>
+                        <pre><code>&lt;input type="text" 
+       data-universal-search="true"
+       placeholder="Search..."&gt;</code></pre>
+                        
+                        <h6>JavaScript (Optional - for custom initialization):</h6>
+                        <pre><code>const searchInput = document.getElementById('my-search');
+new UniversalSearch(searchInput, {
+    minLength: 2,
+    delay: 300,
+    apiUrl: '/search-suggestions/'
+});</code></pre>
+                    </div>
+
+                    <h5 class="mb-3 mt-4">4. Search Features</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <i class="fas fa-keyboard me-2"></i>
+                                    Keyboard Navigation
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled mb-0">
+                                        <li><kbd>↑</kbd> <kbd>↓</kbd> Navigate suggestions</li>
+                                        <li><kbd>Enter</kbd> Select highlighted suggestion</li>
+                                        <li><kbd>Esc</kbd> Close suggestions</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card border-success">
+                                <div class="card-header bg-success text-white">
+                                    <i class="fas fa-magic me-2"></i>
+                                    Smart Features
+                                </div>
+                                <div class="card-body">
+                                    <ul class="list-unstyled mb-0">
+                                        <li>🔍 Case-insensitive search</li>
+                                        <li>📝 Handles spaces and dots</li>
+                                        <li>⚡ Real-time suggestions</li>
+                                        <li>🎯 Click to navigate</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h5 class="mb-3 mt-4">5. Content Types Supported</h5>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <div style="font-size: 2rem;">👨‍🎓</div>
+                                <strong>Students</strong>
+                                <small class="d-block text-muted">Names, IDs, emails</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <div style="font-size: 2rem;">👨‍🏫</div>
+                                <strong>Lecturers</strong>
+                                <small class="d-block text-muted">Names, IDs, emails</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <div style="font-size: 2rem;">📚</div>
+                                <strong>Courses</strong>
+                                <small class="d-block text-muted">Titles, codes, summaries</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center p-3 border rounded">
+                                <div style="font-size: 2rem;">📰</div>
+                                <strong>News & Events</strong>
+                                <small class="d-block text-muted">Titles, content</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 text-center">
+                        <a href="{% url 'home' %}" class="btn btn-primary">
+                            <i class="fas fa-home me-2"></i>
+                            Back to Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

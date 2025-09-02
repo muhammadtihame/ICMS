@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{{ title }} | {% trans 'Learning management system' %}{% endblock title %}
+{% load static %}
+
+{% block content %}
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">{% trans 'Home' %}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{% trans 'Student Feedback Management' %}</li>
+    </ol>
+</nav>
+
+{% include 'snippets/messages.html' %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="title-1">{% trans 'Student Feedback Management' %}</h1>
+    <div>
+        <a href="{% url 'feedback_export' %}{% if request.GET %}?{{ request.GET.urlencode }}{% endif %}" class="btn btn-success">
+            <i class="fas fa-download me-2"></i>{% trans 'Export CSV' %}
+        </a>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ total_feedback }}</h4>
+                        <p class="card-text">{% trans 'Total Feedback' %}</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-comments fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ avg_rating }}/5</h4>
+                        <p class="card-text">{% trans 'Average Rating' %}</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-star fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ lecturer_summary|length }}</h4>
+                        <p class="card-text">{% trans 'Lecturers Rated' %}</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-user-tie fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <h4 class="card-title">{{ feedback_list|length }}</h4>
+                        <p class="card-text">{% trans 'Filtered Results' %}</p>
+                    </div>
+                    <div class="align-self-center">
+                        <i class="fas fa-filter fa-2x"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Form -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-filter me-2"></i>{% trans 'Filter Feedback' %}</h5>
+    </div>
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                {{ filter_form.lecturer.label_tag }}
+                {{ filter_form.lecturer }}
+            </div>
+            <div class="col-md-3">
+                {{ filter_form.rating.label_tag }}
+                {{ filter_form.rating }}
+            </div>
+            <div class="col-md-3">
+                {{ filter_form.date_from.label_tag }}
+                {{ filter_form.date_from }}
+            </div>
+            <div class="col-md-3">
+                {{ filter_form.date_to.label_tag }}
+                {{ filter_form.date_to }}
+            </div>
+            <div class="col-12">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search me-2"></i>{% trans 'Apply Filters' %}
+                </button>
+                <a href="{% url 'admin_feedback' %}" class="btn btn-secondary">
+                    <i class="fas fa-times me-2"></i>{% trans 'Clear Filters' %}
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Lecturer Summary -->
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-chart-bar me-2"></i>{% trans 'Lecturer Summary' %}</h5>
+    </div>
+    <div class="card-body">
+        {% if lecturer_summary %}
+        <div class="row">
+            {% for lecturer, data in lecturer_summary.items %}
+            <div class="col-md-6 col-lg-4 mb-3">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h6 class="card-title">{{ lecturer.get_full_name }}</h6>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">{% trans 'Average Rating' %}:</span>
+                            <span class="fw-bold text-warning">{{ data.avg_rating }}/5</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-muted">{% trans 'Total Feedback' %}:</span>
+                            <span class="fw-bold">{{ data.count }}</span>
+                        </div>
+                        <div class="mb-3">
+                            <span class="text-muted small">{% trans 'Recent Feedback' %}:</span>
+                            {% for feedback in data.recent_feedback %}
+                            <div class="small mt-1">
+                                <span class="text-warning">{{ feedback.rating_stars }}</span>
+                                <span class="text-muted">- {{ feedback.message|truncatechars:50 }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        <a href="{% url 'feedback_detail' lecturer.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye me-1"></i>{% trans 'View Details' %}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">{% trans 'No feedback data available' %}</h5>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Detailed Feedback List -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-list me-2"></i>{% trans 'Detailed Feedback' %}</h5>
+    </div>
+    <div class="card-body">
+        {% if feedback_list %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>{% trans 'Student' %}</th>
+                        <th>{% trans 'Lecturer' %}</th>
+                        <th>{% trans 'Rating' %}</th>
+                        <th>{% trans 'Message' %}</th>
+                        <th>{% trans 'Date' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for feedback in feedback_list %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="{{ feedback.student.student.picture.url }}" alt="{{ feedback.student.student.get_full_name }}" 
+                                     class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                <div>
+                                    <div class="fw-bold">{{ feedback.student.student.get_full_name }}</div>
+                                    <small class="text-muted">{{ feedback.student.student.username }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="{{ feedback.lecturer.picture.url }}" alt="{{ feedback.lecturer.get_full_name }}" 
+                                     class="rounded-circle me-2" style="width: 32px; height: 32px; object-fit: cover;">
+                                <div>
+                                    <div class="fw-bold">{{ feedback.lecturer.get_full_name }}</div>
+                                    <small class="text-muted">{{ feedback.lecturer.email }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="text-warning fw-bold">{{ feedback.rating_stars }}</span>
+                            <small class="text-muted">({{ feedback.rating }}/5)</small>
+                        </td>
+                        <td>
+                            <div class="text-truncate" style="max-width: 200px;" title="{{ feedback.message }}">
+                                {{ feedback.message|truncatechars:100 }}
+                            </div>
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ feedback.created_at|date:"M d, Y H:i" }}</small>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">{% trans 'No feedback found with the current filters' %}</h5>
+            <p class="text-muted">{% trans 'Try adjusting your filter criteria or check back later.' %}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock content %}

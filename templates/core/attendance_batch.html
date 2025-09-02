@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="m-0">{{ batch.title }} - {% trans 'Attendance' %}</h4>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'admin_attendance' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>{% trans 'Back to Admin' %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Batch Info -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <h6><i class="fas fa-users me-1"></i>{% trans 'Batch Information' %}</h6>
+                                <p class="mb-1"><strong>{% trans 'Batch:' %}</strong> {{ batch.title }}</p>
+                                <p class="mb-1"><strong>{% trans 'Program:' %}</strong> {{ batch.program.title }}</p>
+                                <p class="mb-0"><strong>{% trans 'Total Students:' %}</strong> {{ batch.students.count }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Search Form -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Filter Attendance' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form method="GET">
+                                        <div class="row">
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="{{ search_form.course_offering.id_for_label }}" class="form-label">{% trans 'Course' %}</label>
+                                                    {{ search_form.course_offering }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="{{ search_form.start_date.id_for_label }}" class="form-label">{% trans 'Start Date' %}</label>
+                                                    {{ search_form.start_date }}
+                                                </div>
+                                            </div>
+                                            <div class="col-md-4">
+                                                <div class="mb-3">
+                                                    <label for="{{ search_form.end_date.id_for_label }}" class="form-label">{% trans 'End Date' %}</label>
+                                                    {{ search_form.end_date }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-search me-1"></i>{% trans 'Filter' %}
+                                        </button>
+                                        <a href="{% url 'batch_attendance' batch.id %}" class="btn btn-secondary">
+                                            <i class="fas fa-refresh me-1"></i>{% trans 'Clear' %}
+                                        </a>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Attendance Data -->
+                    {% if attendance_data %}
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Batch Attendance Summary' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>{% trans 'Student' %}</th>
+                                                    <th>{% trans 'Student ID' %}</th>
+                                                    <th>{% trans 'Course' %}</th>
+                                                    <th>{% trans 'Total Classes' %}</th>
+                                                    <th>{% trans 'Attended' %}</th>
+                                                    <th>{% trans 'Percentage' %}</th>
+                                                    <th>{% trans 'Status' %}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for data in attendance_data %}
+                                                {% if data.summary %}
+                                                <tr>
+                                                    <td>{{ data.student.get_full_name }}</td>
+                                                    <td>{{ data.student.username }}</td>
+                                                    <td>{{ data.summary.course }}</td>
+                                                    <td>{{ data.summary.total_classes }}</td>
+                                                    <td>{{ data.summary.classes_attended }}</td>
+                                                    <td>
+                                                        <span class="badge {% if data.summary.percentage >= 75 %}bg-success{% elif data.summary.percentage >= 60 %}bg-warning{% else %}bg-danger{% endif %}">
+                                                            {{ data.summary.percentage }}%
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        {% if data.summary.percentage >= 75 %}
+                                                            <span class="text-success"><i class="fas fa-check-circle me-1"></i>{% trans 'Good' %}</span>
+                                                        {% elif data.summary.percentage >= 60 %}
+                                                            <span class="text-warning"><i class="fas fa-exclamation-circle me-1"></i>{% trans 'Moderate' %}</span>
+                                                        {% else %}
+                                                            <span class="text-danger"><i class="fas fa-times-circle me-1"></i>{% trans 'Low' %}</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                {% else %}
+                                                <tr>
+                                                    <td colspan="7">
+                                                        <strong>{{ data.student.get_full_name }}</strong> - {% trans 'Multiple Courses' %}
+                                                        <div class="mt-2">
+                                                            {% for summary in data.courses %}
+                                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                <span>{{ summary.course }} ({{ summary.batch }})</span>
+                                                                <span class="badge {% if summary.percentage >= 75 %}bg-success{% elif summary.percentage >= 60 %}bg-warning{% else %}bg-danger{% endif %}">
+                                                                    {{ summary.percentage }}%
+                                                                </span>
+                                                            </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-1"></i>{% trans 'No attendance data found for this batch. Please use the filter above to search for specific dates or courses.' %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Batch Statistics -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Batch Statistics' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <h4 class="text-primary">{{ batch.students.count }}</h4>
+                                                <p class="text-muted">{% trans 'Total Students' %}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <h4 class="text-success">{{ batch.course_offerings.count }}</h4>
+                                                <p class="text-muted">{% trans 'Total Courses' %}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <h4 class="text-info">{{ batch.program.title }}</h4>
+                                                <p class="text-muted">{% trans 'Program' %}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <h4 class="text-warning">{{ batch.year }}</h4>
+                                                <p class="text-muted">{% trans 'Year' %}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,208 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{{ title }} | {% trans 'Learning management system' %}{% endblock title %}
+{% load static %}
+
+{% block content %}
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">{% trans 'Home' %}</a></li>
+      <li class="breadcrumb-item"><a href="{% url 'admin_feedback' %}">{% trans 'Student Feedback Management' %}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{{ lecturer.get_full_name }}</li>
+    </ol>
+</nav>
+
+{% include 'snippets/messages.html' %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="title-1">{% trans 'Feedback for' %} {{ lecturer.get_full_name }}</h1>
+    <div>
+        <a href="{% url 'admin_feedback' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>{% trans 'Back to Feedback' %}
+        </a>
+        <a href="{% url 'feedback_export' %}?lecturer={{ lecturer.id }}" class="btn btn-success">
+            <i class="fas fa-download me-2"></i>{% trans 'Export CSV' %}
+        </a>
+    </div>
+</div>
+
+<!-- Lecturer Info Card -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-2 text-center">
+                <img src="{{ lecturer.picture.url }}" alt="{{ lecturer.get_full_name }}" 
+                     class="rounded-circle" style="width: 100px; height: 100px; object-fit: cover;">
+            </div>
+            <div class="col-md-7">
+                <h4 class="card-title">{{ lecturer.get_full_name }}</h4>
+                <p class="card-text text-muted">{{ lecturer.email }}</p>
+                <p class="card-text">
+                    <small class="text-muted">
+                        <i class="fas fa-user-tie me-1"></i>{% trans 'Lecturer' %}
+                        {% if lecturer.is_active %}
+                            <span class="badge bg-success ms-2">{% trans 'Active' %}</span>
+                        {% else %}
+                            <span class="badge bg-danger ms-2">{% trans 'Inactive' %}</span>
+                        {% endif %}
+                    </small>
+                </p>
+            </div>
+            <div class="col-md-3 text-end">
+                <div class="text-center">
+                    <h3 class="text-warning mb-0">{{ avg_rating }}/5</h3>
+                    <div class="text-warning mb-2">
+                        {% for i in "12345" %}
+                            {% if forloop.counter <= avg_rating %}
+                                <i class="fas fa-star"></i>
+                            {% else %}
+                                <i class="far fa-star"></i>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <p class="text-muted mb-0">{{ total_feedback }} {% trans 'reviews' %}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Rating Distribution -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-chart-pie me-2"></i>{% trans 'Rating Distribution' %}</h5>
+            </div>
+            <div class="card-body">
+                {% for rating, count in rating_distribution.items %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <div class="d-flex align-items-center">
+                        <span class="text-warning me-2">
+                            {% for i in "12345" %}
+                                {% if forloop.counter <= rating %}
+                                    <i class="fas fa-star"></i>
+                                {% else %}
+                                    <i class="far fa-star"></i>
+                                {% endif %}
+                            {% endfor %}
+                        </span>
+                        <span class="text-muted">({{ rating }})</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="progress me-2" style="width: 100px; height: 8px;">
+                            {% if total_feedback > 0 %}
+                                <div class="progress-bar bg-warning" style="width: {{ rating_percentages.rating }}%"></div>
+                            {% endif %}
+                        </div>
+                        <span class="text-muted small">{{ count }}</span>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>{% trans 'Feedback Statistics' %}</h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-primary">{{ total_feedback }}</h4>
+                        <p class="text-muted">{% trans 'Total Feedback' %}</p>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-success">{{ avg_rating }}</h4>
+                        <p class="text-muted">{% trans 'Average Rating' %}</p>
+                    </div>
+                </div>
+                <hr>
+                <div class="row text-center">
+                    <div class="col-6">
+                        <h4 class="text-info">{{ feedback_list|length }}</h4>
+                        <p class="text-muted">{% trans 'This Page' %}</p>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-warning">
+                            {% if total_feedback > 0 %}
+                                {{ rating_percentages.5|floatformat:0 }}%
+                            {% else %}
+                                0%
+                            {% endif %}
+                        </h4>
+                        <p class="text-muted">{% trans '5-Star Ratings' %}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Feedback List -->
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-comments me-2"></i>{% trans 'All Feedback' %}</h5>
+    </div>
+    <div class="card-body">
+        {% if feedback_list %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>{% trans 'Student' %}</th>
+                        <th>{% trans 'Rating' %}</th>
+                        <th>{% trans 'Message' %}</th>
+                        <th>{% trans 'Date' %}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for feedback in feedback_list %}
+                    <tr>
+                        <td>
+                            <div class="d-flex align-items-center">
+                                <img src="{{ feedback.student.picture.url }}" alt="{{ feedback.student.get_full_name }}" 
+                                     class="rounded-circle me-2" style="width: 40px; height: 40px; object-fit: cover;">
+                                <div>
+                                    <div class="fw-bold">{{ feedback.student.get_full_name }}</div>
+                                    <small class="text-muted">{{ feedback.student.student_id }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="text-warning fw-bold">{{ feedback.rating_stars }}</div>
+                            <small class="text-muted">({{ feedback.rating }}/5)</small>
+                        </td>
+                        <td>
+                            <div class="feedback-message">
+                                {{ feedback.message|linebreaks }}
+                            </div>
+                        </td>
+                        <td>
+                            <small class="text-muted">{{ feedback.created_at|date:"M d, Y H:i" }}</small>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">{% trans 'No feedback available for this lecturer' %}</h5>
+            <p class="text-muted">{% trans 'Students haven\'t provided feedback yet.' %}</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+.feedback-message {
+    max-width: 400px;
+    word-wrap: break-word;
+}
+</style>
+
+{% endblock content %}

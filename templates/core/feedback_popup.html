@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans 'Student Feedback' %} | {% trans 'Learning management system' %}{% endblock title %}
+{% load static %}
+
+{% block extra_css %}
+<style>
+    .feedback-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.8);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+    }
+    
+    .feedback-content {
+        background: white;
+        border-radius: 15px;
+        padding: 30px;
+        max-width: 800px;
+        width: 100%;
+        max-height: 90vh;
+        overflow-y: auto;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+    
+    .feedback-header {
+        text-align: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+    
+    .feedback-header h2 {
+        color: #0b4b8c;
+        margin-bottom: 10px;
+    }
+    
+    .feedback-header p {
+        color: #666;
+        font-size: 16px;
+    }
+    
+    .lecturer-feedback-section {
+        background: #f8f9fa;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 20px;
+        border-left: 4px solid #0b4b8c;
+    }
+    
+    .lecturer-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: #0b4b8c;
+        margin-bottom: 15px;
+    }
+    
+    .star-rating {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .star-rating label {
+        font-weight: 500;
+        color: #555;
+        min-width: 80px;
+    }
+    
+    .star-rating select {
+        flex: 1;
+        max-width: 200px;
+    }
+    
+    .star-display {
+        font-size: 20px;
+        color: #ffc107;
+        margin-left: 10px;
+    }
+    
+    .message-section {
+        margin-top: 15px;
+    }
+    
+    .message-section label {
+        font-weight: 500;
+        color: #555;
+        margin-bottom: 8px;
+        display: block;
+    }
+    
+    .submit-section {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 20px;
+        border-top: 2px solid #f0f0f0;
+    }
+    
+    .btn-submit-feedback {
+        background: linear-gradient(135deg, #0b4b8c, #1a6bb8);
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(11, 75, 140, 0.3);
+    }
+    
+    .btn-submit-feedback:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(11, 75, 140, 0.4);
+    }
+    
+    .btn-submit-feedback:disabled {
+        background: #ccc;
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .required-field {
+        color: #dc3545;
+        font-size: 14px;
+        margin-top: 5px;
+    }
+    
+    .required-field-label {
+        color: #dc3545;
+        font-weight: 600;
+    }
+    
+    .required-field-label::after {
+        content: " *";
+        color: #dc3545;
+    }
+    
+    .form-error {
+        color: #dc3545;
+        font-size: 14px;
+        margin-top: 5px;
+        font-weight: 500;
+    }
+    
+    .feedback-header .text-danger {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 8px;
+        padding: 10px;
+        margin: 15px 0;
+    }
+    
+    @media (max-width: 768px) {
+        .feedback-content {
+            padding: 20px;
+            margin: 10px;
+        }
+        
+        .lecturer-feedback-section {
+            padding: 15px;
+        }
+        
+        .star-rating {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .star-rating select {
+            max-width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="feedback-modal">
+    <div class="feedback-content">
+        <div class="feedback-header">
+            <h2><i class="fas fa-star text-warning me-2"></i>{% trans 'Mandatory Student Feedback' %}</h2>
+            <p class="text-danger fw-bold mb-2">{% trans '⚠️ IMPORTANT: Feedback is mandatory and cannot be skipped!' %}</p>
+            <p>{% trans 'You must provide ratings and improvement suggestions for ALL lecturers before you can access any other features. This helps us improve the quality of education.' %}</p>
+        </div>
+
+        <form method="post" id="feedbackForm">
+            {% csrf_token %}
+            
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {% for error in form.non_field_errors %}
+                    {{ error }}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% for lecturer in lecturers %}
+            <div class="lecturer-feedback-section">
+                <div class="lecturer-name">
+                    <i class="fas fa-user-tie me-2"></i>{{ lecturer.get_full_name }}
+                </div>
+                
+                <div class="star-rating">
+                    <label for="id_rating_{{ lecturer.id }}" class="required-field-label">{% trans 'Rating' %} *:</label>
+                    <select name="rating_{{ lecturer.id }}" id="id_rating_{{ lecturer.id }}" class="form-control rating-select" required>
+                        <option value="">{% trans 'Select rating' %}</option>
+                        <option value="1">1 ★</option>
+                        <option value="2">2 ★★</option>
+                        <option value="3">3 ★★★</option>
+                        <option value="4">4 ★★★★</option>
+                        <option value="5">5 ★★★★★</option>
+                    </select>
+                    <div class="star-display" id="star_display_{{ lecturer.id }}"></div>
+                    {% if form.rating_1.errors %}
+                        <div class="form-error">{{ form.rating_1.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="message-section">
+                    <label for="id_message_{{ lecturer.id }}" class="required-field-label">{% trans 'Improvement Suggestions' %} *:</label>
+                    <textarea 
+                        name="message_{{ lecturer.id }}" 
+                        id="id_message_{{ lecturer.id }}" 
+                        class="form-control" 
+                        rows="3" 
+                        placeholder="{% trans 'Please share your suggestions for improvement...' %}"
+                        required
+                    ></textarea>
+                    {% if form.message_1.errors %}
+                        <div class="form-error">{{ form.message_1.errors.0 }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="submit-section">
+                <div class="alert alert-warning mb-3">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>{% trans 'Mandatory Notice:' %}</strong> {% trans 'You must provide feedback for ALL lecturers before you can access any other features. This popup will continue to appear until all feedback is submitted.' %}
+                </div>
+                <button type="submit" class="btn-submit-feedback" id="submitBtn">
+                    <i class="fas fa-paper-plane me-2"></i>{% trans 'Submit Feedback' %}
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Update star display when rating changes
+    const ratingSelects = document.querySelectorAll('.rating-select');
+    ratingSelects.forEach(select => {
+        select.addEventListener('change', function() {
+            const lecturerId = this.id.split('_')[2];
+            const starDisplay = document.getElementById(`star_display_${lecturerId}`);
+            const rating = parseInt(this.value);
+            
+            if (rating > 0) {
+                starDisplay.innerHTML = '★'.repeat(rating) + '☆'.repeat(5 - rating);
+            } else {
+                starDisplay.innerHTML = '';
+            }
+        });
+    });
+    
+    // Form validation
+    const form = document.getElementById('feedbackForm');
+    const submitBtn = document.getElementById('submitBtn');
+    
+    form.addEventListener('submit', function(e) {
+        const ratingSelects = document.querySelectorAll('.rating-select');
+        const messageTextareas = document.querySelectorAll('textarea[name^="message_"]');
+        let allFieldsCompleted = true;
+        
+        // Check all rating fields
+        ratingSelects.forEach(select => {
+            if (!select.value) {
+                allFieldsCompleted = false;
+                select.style.borderColor = '#dc3545';
+                select.classList.add('is-invalid');
+            } else {
+                select.style.borderColor = '';
+                select.classList.remove('is-invalid');
+            }
+        });
+        
+        // Check all message fields
+        messageTextareas.forEach(textarea => {
+            if (!textarea.value.trim()) {
+                allFieldsCompleted = false;
+                textarea.style.borderColor = '#dc3545';
+                textarea.classList.add('is-invalid');
+            } else {
+                textarea.style.borderColor = '';
+                textarea.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!allFieldsCompleted) {
+            e.preventDefault();
+            alert('{% trans "Please complete ALL fields (rating and suggestions) for every lecturer before submitting." %}');
+            return false;
+        }
+        
+        // Disable submit button to prevent double submission
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>{% trans "Submitting..." %}';
+    });
+    
+    // Prevent closing modal by clicking outside or pressing escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            e.preventDefault();
+        }
+    });
+    
+    // Prevent closing modal by clicking outside
+    document.querySelector('.feedback-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            e.preventDefault();
+        }
+    });
+});
+</script>
+{% endblock %}

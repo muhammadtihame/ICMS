@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid attendance-admin-container">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="m-0">{% trans 'Attendance Management (Admin)' %}</h4>
+                        <div class="d-flex gap-2 action-buttons">
+                            <a href="{% url 'attendance_reports' %}" class="btn btn-info">
+                                <i class="fas fa-chart-bar me-1"></i>{% trans 'Reports' %}
+                            </a>
+                            <a href="{% url 'detention_list' %}" class="btn btn-warning">
+                                <i class="fas fa-exclamation-triangle me-1"></i>{% trans 'Detention List' %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Search and Calculation Forms -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Search Student Attendance' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form method="GET">
+                                        {{ search_form.as_p }}
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-search me-1"></i>{% trans 'Search' %}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Calculate Attendance Percentage' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form method="POST">
+                                        {% csrf_token %}
+                                        {{ calculation_form.as_p }}
+                                        <button type="submit" class="btn btn-success">
+                                            <i class="fas fa-calculator me-1"></i>{% trans 'Calculate' %}
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Calculation Result -->
+                    {% if calculation_result %}
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Attendance Calculation Result' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>{% trans 'Student' %}</th>
+                                                    <th>{% trans 'Course' %}</th>
+                                                    <th>{% trans 'Batch' %}</th>
+                                                    <th>{% trans 'Total Classes' %}</th>
+                                                    <th>{% trans 'Attended' %}</th>
+                                                    <th>{% trans 'Percentage' %}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>{{ calculation_result.student.get_full_name }}</td>
+                                                    <td>{{ calculation_result.course }}</td>
+                                                    <td>{{ calculation_result.batch }}</td>
+                                                    <td>{{ calculation_result.total_classes }}</td>
+                                                    <td>{{ calculation_result.classes_attended }}</td>
+                                                    <td>
+                                                        <span class="badge {% if calculation_result.percentage >= 75 %}bg-success{% elif calculation_result.percentage >= 60 %}bg-warning{% else %}bg-danger{% endif %}">
+                                                            {{ calculation_result.percentage }}%
+                                                        </span>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Search Results -->
+                    {% if attendance_data %}
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Search Results' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>{% trans 'Student' %}</th>
+                                                    <th>{% trans 'Student ID' %}</th>
+                                                    <th>{% trans 'Course' %}</th>
+                                                    <th>{% trans 'Batch' %}</th>
+                                                    <th>{% trans 'Total Classes' %}</th>
+                                                    <th>{% trans 'Attended' %}</th>
+                                                    <th>{% trans 'Percentage' %}</th>
+                                                    <th>{% trans 'Actions' %}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for data in attendance_data %}
+                                                {% if data.summary %}
+                                                <tr>
+                                                    <td>{{ data.student.get_full_name }}</td>
+                                                    <td>{{ data.student.username }}</td>
+                                                    <td>{{ data.summary.course }}</td>
+                                                    <td>{{ data.summary.batch }}</td>
+                                                    <td>{{ data.summary.total_classes }}</td>
+                                                    <td>{{ data.summary.classes_attended }}</td>
+                                                    <td>
+                                                        <span class="badge {% if data.summary.percentage >= 75 %}bg-success{% elif data.summary.percentage >= 60 %}bg-warning{% else %}bg-danger{% endif %}">
+                                                            {{ data.summary.percentage }}%
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <a href="{% url 'batch_attendance' data.student.batch.id %}" class="btn btn-sm btn-info">
+                                                            <i class="fas fa-eye me-1"></i>{% trans 'View Batch' %}
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                {% else %}
+                                                <tr>
+                                                    <td colspan="8">
+                                                        <strong>{{ data.student.get_full_name }}</strong> - {% trans 'Multiple Courses' %}
+                                                        <div class="mt-2">
+                                                            {% for summary in data.summaries %}
+                                                            <div class="d-flex justify-content-between align-items-center mb-1">
+                                                                <span>{{ summary.course }} ({{ summary.batch }})</span>
+                                                                <span class="badge {% if summary.percentage >= 75 %}bg-success{% elif summary.percentage >= 60 %}bg-warning{% else %}bg-danger{% endif %}">
+                                                                    {{ summary.percentage }}%
+                                                                </span>
+                                                            </div>
+                                                            {% endfor %}
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                                {% endif %}
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Quick Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Quick Actions' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row quick-actions">
+                                        <div class="col-md-3">
+                                            <a href="{% url 'attendance_reports' %}" class="btn btn-outline-primary w-100 mb-2">
+                                                <i class="fas fa-chart-bar me-1"></i>{% trans 'View Reports' %}
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <a href="{% url 'detention_list' %}" class="btn btn-outline-warning w-100 mb-2">
+                                                <i class="fas fa-exclamation-triangle me-1"></i>{% trans 'Detention List' %}
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <a href="{% url 'comprehensive_timetable' %}" class="btn btn-outline-info w-100 mb-2">
+                                                <i class="fas fa-calendar-alt me-1"></i>{% trans 'Timetable' %}
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <a href="{% url 'admin_attendance' %}" class="btn btn-outline-secondary w-100 mb-2">
+                                                <i class="fas fa-refresh me-1"></i>{% trans 'Refresh' %}
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

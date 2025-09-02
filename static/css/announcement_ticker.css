@@ -1,0 +1,228 @@
+/* Properly align announcement ticker below the navbar */
+.announcement-ticker {
+    position: absolute !important;
+    /* Fix it relative to navbar */
+    top: 100% !important;
+    /* Place directly below navbar */
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 50px !important;
+    /* Standard height */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 0 16px !important;
+    border-radius: 0 !important;
+    /* Remove rounded corners for flush alignment */
+    border-top: 1px solid rgba(11, 75, 140, 0.2) !important;
+    border-bottom: 1px solid rgba(11, 75, 140, 0.2) !important;
+    z-index: 1100 !important;
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    box-sizing: border-box !important;
+}
+
+/* Ensure ticker text flows neatly */
+.ticker-container {
+    width: 100% !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+    background: transparent !important;
+    visibility: visible !important;
+    z-index: 1100 !important;
+}
+
+.ticker-content {
+    display: inline-flex !important;
+    align-items: center !important;
+    animation: marquee 20s linear infinite !important;
+    white-space: nowrap !important;
+    will-change: transform !important;
+    font-size: 0.95rem !important;
+    line-height: 1.3 !important;
+    color: #0b4b8c !important;
+    font-weight: 500 !important;
+    width: max-content !important;
+    min-width: 100% !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+}
+
+.ticker-item {
+    display: inline-flex !important;
+    align-items: center !important;
+    padding: 6px 16px !important;
+    margin-right: 40px !important;
+    color: #0b4b8c !important;
+    font-weight: 500 !important;
+    font-size: 0.95rem !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s ease !important;
+    border: 1px solid rgba(11, 75, 140, 0.15) !important;
+    cursor: pointer !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+}
+
+.ticker-item:hover {
+    background: rgba(255, 255, 255, 0.95) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+    border-color: rgba(11, 75, 140, 0.3) !important;
+    color: #0b4b8c !important;
+    text-decoration: none !important;
+}
+
+.ticker-item i {
+    color: #007bff !important;
+    margin-right: 8px !important;
+    font-size: 1rem !important;
+    flex-shrink: 0 !important;
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+/* Safari-specific fixes */
+@-webkit-keyframes marquee {
+    0% {
+        -webkit-transform: translateX(100%);
+    }
+
+    100% {
+        -webkit-transform: translateX(-100%);
+    }
+}
+
+/* Safari compatibility */
+.announcement-ticker {
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000;
+}
+
+.ticker-content {
+    -webkit-animation: marquee 20s linear infinite;
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+}
+
+.ticker-container:hover .ticker-content {
+    animation-play-state: paused !important;
+}
+
+/* Minimal fix for dropdown overlap */
+.dropdown-menu {
+    z-index: 1400 !important;
+    /* Ensure dropdown appears above ticker */
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    margin-top: 5px !important;
+    min-width: 200px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Ensure ticker is visible in all contexts */
+.announcement-ticker,
+.ticker-container,
+.ticker-content,
+.ticker-item {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+}
+
+/* Force ticker to be visible even if parent elements hide it */
+.announcement-ticker {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: absolute !important;
+    z-index: 1100 !important;
+    pointer-events: auto !important;
+}
+
+@media (max-width: 768px) {
+    .announcement-ticker {
+        padding: 10px 12px !important;
+        /* Reduced padding */
+        height: 45px !important;
+        /* Slightly smaller height */
+    }
+
+    .ticker-content {
+        animation-duration: 18s !important;
+        /* Faster animation on mobile */
+        font-size: 0.9rem !important;
+    }
+
+    .ticker-item {
+        padding: 5px 12px !important;
+        /* Reduced padding */
+        margin-right: 30px !important;
+        /* Reduced margin */
+        font-size: 0.9rem !important;
+        /* Smaller font */
+    }
+
+    .ticker-item i {
+        font-size: 0.9rem !important;
+        margin-right: 6px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .announcement-ticker {
+        padding: 8px 10px !important;
+        /* Further reduced padding */
+        height: 40px !important;
+        /* Smaller height */
+    }
+
+    .ticker-content {
+        animation-duration: 16s !important;
+        /* Even faster animation */
+        font-size: 0.85rem !important;
+    }
+
+    .ticker-item {
+        padding: 4px 10px !important;
+        /* Further reduced padding */
+        margin-right: 25px !important;
+        /* Further reduced margin */
+        font-size: 0.85rem !important;
+        /* Even smaller font */
+    }
+
+    .ticker-item i {
+        font-size: 0.85rem !important;
+        margin-right: 5px !important;
+    }
+
+    .form-header {
+        margin: 0 5px !important;
+    }
+
+    .toggle-btn {
+        margin-right: 5px !important;
+    }
+}

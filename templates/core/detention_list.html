@@ -1,0 +1,232 @@
+{% extends 'base.html' %}
+{% load i18n %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h4 class="m-0">{% trans 'Detention List' %} ({% trans 'Below' %} 75%)</h4>
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'admin_attendance' %}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-1"></i>{% trans 'Back to Admin' %}
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Filter Form -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Filter Detention List' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <form method="GET">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <div class="mb-3">
+                                                    <label for="threshold" class="form-label">{% trans 'Threshold (%)' %}</label>
+                                                    <input type="number" class="form-control" id="threshold" name="threshold" 
+                                                           value="{{ threshold }}" min="0" max="100" step="0.1">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="mb-3">
+                                                    <label for="start_date" class="form-label">{% trans 'Start Date' %}</label>
+                                                    <input type="date" class="form-control" id="start_date" name="start_date" 
+                                                           value="{{ start_date|default:'' }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="mb-3">
+                                                    <label for="end_date" class="form-label">{% trans 'End Date' %}</label>
+                                                    <input type="date" class="form-control" id="end_date" name="end_date" 
+                                                           value="{{ end_date|default:'' }}">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <div class="mb-3">
+                                                    <label class="form-label">&nbsp;</label>
+                                                    <button type="submit" class="btn btn-primary w-100">
+                                                        <i class="fas fa-filter me-1"></i>{% trans 'Filter' %}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Detention List -->
+                    {% if detention_list %}
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Students with Low Attendance' %} ({% trans 'Below' %} {{ threshold }}%)</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>{% trans 'Student' %}</th>
+                                                    <th>{% trans 'Student ID' %}</th>
+                                                    <th>{% trans 'Course' %}</th>
+                                                    <th>{% trans 'Batch' %}</th>
+                                                    <th>{% trans 'Attendance %' %}</th>
+                                                    <th>{% trans 'Threshold' %}</th>
+                                                    <th>{% trans 'Status' %}</th>
+                                                    <th>{% trans 'Actions' %}</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for item in detention_list %}
+                                                <tr>
+                                                    <td>{{ item.student.get_full_name }}</td>
+                                                    <td>{{ item.student.username }}</td>
+                                                    <td>{{ item.course }}</td>
+                                                    <td>{{ item.batch }}</td>
+                                                    <td>
+                                                        <span class="badge bg-danger">{{ item.percentage }}%</span>
+                                                    </td>
+                                                    <td>{{ item.threshold }}%</td>
+                                                    <td>
+                                                        <span class="text-danger">
+                                                            <i class="fas fa-exclamation-triangle me-1"></i>{% trans 'Low Attendance' %}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <a href="{% url 'batch_attendance' item.student.batch.id %}" class="btn btn-sm btn-info">
+                                                            <i class="fas fa-eye me-1"></i>{% trans 'View Batch' %}
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Detention Statistics' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <h4 class="text-danger">{{ detention_list|length }}</h4>
+                                                <p class="text-muted">{% trans 'Total Students in Detention' %}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <h4 class="text-warning">{{ threshold }}%</h4>
+                                                <p class="text-muted">{% trans 'Attendance Threshold' %}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <h4 class="text-info">
+                                                    {% if detention_list %}
+                                                        {% widthratio detention_list|length detention_list|length 1 %}
+                                                    {% else %}
+                                                        0
+                                                    {% endif %}
+                                                </h4>
+                                                <p class="text-muted">{% trans 'Unique Students' %}</p>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <div class="text-center">
+                                                <h4 class="text-primary">
+                                                    {% if detention_list %}
+                                                        {% for item in detention_list|slice:":1" %}
+                                                            {{ item.student.batch.program.title }}
+                                                        {% endfor %}
+                                                    {% else %}
+                                                        -
+                                                    {% endif %}
+                                                </h4>
+                                                <p class="text-muted">{% trans 'Most Affected Program' %}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-1"></i>{% trans 'Great news! No students are currently in the detention list (below' %} {{ threshold }}%{% trans ').' %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Quick Actions -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h6 class="m-0">{% trans 'Quick Actions' %}</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <a href="{% url 'attendance_reports' %}" class="btn btn-outline-primary w-100 mb-2">
+                                                <i class="fas fa-chart-bar me-1"></i>{% trans 'View Reports' %}
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <a href="{% url 'admin_attendance' %}" class="btn btn-outline-info w-100 mb-2">
+                                                <i class="fas fa-search me-1"></i>{% trans 'Search Students' %}
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <a href="{% url 'comprehensive_timetable' %}" class="btn btn-outline-secondary w-100 mb-2">
+                                                <i class="fas fa-calendar-alt me-1"></i>{% trans 'Timetable' %}
+                                            </a>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button onclick="window.print()" class="btn btn-outline-dark w-100 mb-2">
+                                                <i class="fas fa-print me-1"></i>{% trans 'Print Report' %}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

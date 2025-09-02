@@ -1,0 +1,1192 @@
+/* Custom blue theme overrides */
+:root {
+    --brand-primary: #0b4b8c;
+    --brand-primary-2: #132f5b;
+    --brand-accent: #4cc3ff;
+}
+
+/* Safari compatibility fixes */
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+/* Fix Safari flexbox issues */
+#top-navbar .container,
+#top-navbar .nav-wrapper {
+    -webkit-display: flex;
+    -moz-display: flex;
+    display: flex;
+}
+
+/* Additional Safari compatibility */
+#top-navbar .toggle-btn,
+#top-navbar .form-header,
+#top-navbar .dropdown {
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+}
+
+/* Fix Safari button rendering */
+.btn {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+/* Make header much larger to accommodate all elements properly */
+#top-navbar {
+    background: linear-gradient(180deg, var(--brand-primary) 0%, var(--brand-primary-2) 100%) !important;
+    min-height: 120px !important;
+    /* Further increased to ensure all elements fit */
+    padding: 20px 0 !important;
+    /* Increased padding */
+    position: fixed !important;
+    top: 0 !important;
+    width: 100% !important;
+    z-index: 1000 !important;
+}
+
+/* Fix header container layout */
+#top-navbar .container {
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    padding-left: 60px !important;
+    /* Shift entire container to the left */
+}
+
+#top-navbar .nav-wrapper {
+    width: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 25px !important;
+    /* Increased gap */
+    min-height: 80px !important;
+    /* Increased minimum height */
+    margin-left: 30px !important;
+    /* Additional left shift for nav elements */
+}
+
+/* Site title styling */
+#top-navbar .site-title {
+    letter-spacing: 0.06em;
+    font-size: 1.1rem !important;
+    /* Smaller font size */
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+/* Toggle button styling */
+#top-navbar .toggle-btn {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 50px !important;
+    /* Increased size */
+    height: 50px !important;
+    /* Increased size */
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-radius: 5px !important;
+    cursor: pointer !important;
+    color: white !important;
+    font-size: 1.3rem !important;
+    /* Increased font size */
+    flex-shrink: 0 !important;
+}
+
+#top-navbar .toggle-btn:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+}
+
+/* Search form styling */
+#top-navbar .form-header {
+    display: flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+    min-width: 300px !important;
+    /* Increased width */
+    max-width: 450px !important;
+    /* Increased max width */
+    height: 50px !important;
+    /* Increased height */
+}
+
+#top-navbar .form-header .form-control {
+    height: 50px !important;
+    /* Increased height */
+    font-size: 0.95rem !important;
+    /* Increased font size */
+    border: none !important;
+    border-radius: 5px 0 0 5px !important;
+    padding: 10px 18px !important;
+    /* Increased padding */
+    background: rgba(255, 255, 255, 0.9) !important;
+}
+
+#top-navbar .form-header .btn {
+    height: 50px !important;
+    /* Increased height */
+    border: none !important;
+    border-radius: 0 5px 5px 0 !important;
+    padding: 10px 18px !important;
+    /* Increased padding */
+    background: rgba(255, 255, 255, 0.2) !important;
+    color: white !important;
+    font-size: 0.95rem !important;
+    /* Increased font size */
+}
+
+#top-navbar .form-header .btn:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+}
+
+/* Profile dropdown styling */
+#top-navbar .dropdown {
+    display: flex !important;
+    align-items: center !important;
+    flex-shrink: 0 !important;
+}
+
+#top-navbar .avatar {
+    width: 50px !important;
+    /* Increased size */
+    height: 50px !important;
+    /* Increased size */
+    border-radius: 50% !important;
+    overflow: hidden !important;
+    cursor: pointer !important;
+    border: 2px solid rgba(255, 255, 255, 0.3) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+}
+
+#top-navbar .avatar img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+
+#top-navbar .avatar:hover {
+    border-color: rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Professional Announcement Ticker - Marquee Style */
+/* Adjusted Announcement Ticker for Better Alignment */
+.announcement-ticker {
+    margin-bottom: 10px !important;
+    margin-top: 20px !important;
+    position: relative;
+    z-index: 15 !important;
+    padding: 8px 16px !important;
+    /* Adjusted padding for better fit */
+    height: 70px !important;
+    /* Further increased height for full visibility */
+    overflow: hidden !important;
+    /* Hide overflow to keep content inside */
+    background: linear-gradient(90deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%) !important;
+    border: 2px solid rgba(11, 75, 140, 0.3) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    display: flex !important;
+    /* Use flexbox for vertical centering */
+    align-items: center !important;
+    /* Vertically center content */
+    visibility: visible !important;
+    opacity: 1 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Ticker container for proper scrolling */
+.ticker-container {
+    position: relative;
+    z-index: 15 !important;
+    height: 100% !important;
+    overflow: hidden !important;
+    /* Hide overflow to keep content inside */
+    white-space: nowrap !important;
+    box-sizing: border-box !important;
+    background: transparent !important;
+    display: flex !important;
+    align-items: center !important;
+    /* Vertically center */
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* Ticker content with smooth marquee animation */
+.ticker-content {
+    display: inline-flex !important;
+    /* Use flexbox for better alignment */
+    align-items: center !important;
+    /* Vertically center */
+    animation: marquee 25s linear infinite !important;
+    /* Smooth marquee animation */
+    white-space: nowrap !important;
+    will-change: transform !important;
+    font-size: 0.95rem !important;
+    line-height: 1.3 !important;
+    color: #0b4b8c !important;
+    font-weight: 500 !important;
+    width: max-content !important;
+    /* Allow content to determine width */
+    min-width: 100% !important;
+    /* Ensure it takes full width */
+    cursor: pointer !important;
+    /* Make clickable */
+    transition: all 0.3s ease !important;
+}
+
+/* Individual ticker items */
+.ticker-item {
+    display: inline-flex !important;
+    align-items: center !important;
+    /* Vertically center */
+    padding: 6px 16px !important;
+    /* Proper padding */
+    margin-right: 40px !important;
+    /* Space between items */
+    color: #0b4b8c !important;
+    font-weight: 500 !important;
+    font-size: 0.95rem !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s ease !important;
+    border: 1px solid rgba(11, 75, 140, 0.15) !important;
+    cursor: pointer !important;
+    /* Make clickable */
+    text-decoration: none !important;
+    /* Remove default link styling */
+    white-space: nowrap !important;
+}
+
+/* Hover effects for ticker items */
+.ticker-item:hover {
+    background: rgba(255, 255, 255, 0.95) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+    border-color: rgba(11, 75, 140, 0.3) !important;
+    color: #0b4b8c !important;
+    text-decoration: none !important;
+}
+
+/* Icons in ticker items */
+.ticker-item i {
+    color: #007bff !important;
+    margin-right: 8px !important;
+    font-size: 1rem !important;
+    flex-shrink: 0 !important;
+    /* Prevent icon from shrinking */
+}
+
+/* Smooth marquee animation */
+@keyframes marquee {
+    0% {
+        transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+/* Pause animation on hover for better readability */
+.ticker-container:hover .ticker-content {
+    animation-play-state: paused !important;
+}
+
+/* Ensure ticker is visible in all contexts */
+.announcement-ticker,
+.ticker-container,
+.ticker-content,
+.ticker-item {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+}
+
+/* Force ticker to be visible even if parent elements hide it */
+.announcement-ticker {
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    position: relative !important;
+    z-index: 999 !important;
+    /* Very high z-index */
+    pointer-events: auto !important;
+}
+
+/* Ensure ticker appears above all other elements */
+.announcement-ticker {
+    z-index: 9999 !important;
+    /* Extremely high z-index */
+    position: relative !important;
+    display: block !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Fix for attendance admin page buttons */
+.attendance-admin-container {
+    margin-top: 20px !important;
+    /* Increased margin for safety */
+    padding-top: 20px !important;
+    /* Increased padding for better spacing */
+    position: relative;
+    z-index: 10;
+}
+
+.attendance-admin-container .card-header {
+    position: relative;
+    z-index: 15;
+    padding: 10px 15px !important;
+    /* Reduced padding */
+    min-height: 50px !important;
+    /* Ensure minimum height */
+}
+
+.attendance-admin-container .btn {
+    position: relative;
+    z-index: 20;
+    margin: 3px !important;
+    /* Increased margin between buttons */
+    font-size: 0.8rem !important;
+    /* Smaller buttons */
+    padding: 5px 10px !important;
+    /* Reduced padding */
+}
+
+/* General fix for card headers with buttons */
+.card-header .d-flex.justify-content-between {
+    position: relative;
+    z-index: 15;
+    align-items: center !important;
+    min-height: 50px !important;
+    /* Increased minimum height */
+    padding: 5px 0 !important;
+}
+
+.card-header .btn {
+    position: relative;
+    z-index: 20;
+    margin: 3px !important;
+    /* Increased margin */
+    font-size: 0.8rem !important;
+    /* Smaller buttons */
+    padding: 5px 10px !important;
+    /* Reduced padding */
+    line-height: 1.2 !important;
+}
+
+/* Ensure proper spacing after navbar and ticker */
+#main {
+    padding-top: 160px !important;
+    /* Reduced for shorter ticker */
+    position: relative;
+    z-index: 10;
+    margin-top: 20px !important;
+    /* Reduced margin */
+}
+
+/* Add spacing to all main content areas */
+.container-fluid,
+.container {
+    padding-top: 25px !important;
+    /* Reduced padding */
+    margin-top: 20px !important;
+    /* Reduced margin */
+}
+
+/* Fix for sidebar spacing */
+#sidebar {
+    margin-top: 160px !important;
+    /* Match main content */
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100vh !important;
+    z-index: 999 !important;
+}
+
+/* Fix for quick action buttons */
+.quick-actions .btn {
+    position: relative;
+    z-index: 15;
+    margin: 3px !important;
+    /* Increased margin */
+    font-size: 0.8rem !important;
+    padding: 5px 10px !important;
+}
+
+/* Enhanced spacing for all panels and cards */
+.card {
+    margin-bottom: 25px !important;
+    /* Increased margin */
+    margin-top: 15px !important;
+    /* Increased margin */
+    position: relative;
+    z-index: 5;
+}
+
+.card-body {
+    padding: 15px 20px !important;
+    /* Reduced padding */
+    position: relative;
+    z-index: 10;
+}
+
+/* Fix for table headers and content */
+.table-responsive {
+    margin-top: 15px !important;
+    /* Increased margin */
+    position: relative;
+    z-index: 5;
+}
+
+.table thead th {
+    padding: 8px 6px !important;
+    /* Further reduced padding */
+    font-size: 0.85rem !important;
+    /* Smaller font */
+    line-height: 1.2 !important;
+}
+
+.table tbody td {
+    padding: 6px !important;
+    /* Further reduced padding */
+    font-size: 0.85rem !important;
+    /* Smaller font */
+    line-height: 1.2 !important;
+}
+
+/* Fix for form spacing */
+.form-group {
+    margin-bottom: 12px !important;
+    /* Reduced margin */
+    position: relative;
+    z-index: 5;
+}
+
+.form-control {
+    padding: 6px 10px !important;
+    /* Reduced padding */
+    font-size: 0.85rem !important;
+    /* Smaller font */
+    line-height: 1.2 !important;
+}
+
+/* Fix for button groups */
+.btn-group .btn {
+    margin: 2px !important;
+    /* Increased margin */
+    padding: 5px 8px !important;
+    /* Reduced padding */
+    font-size: 0.8rem !important;
+}
+
+/* Fix for navigation tabs */
+.nav-tabs {
+    margin-bottom: 20px !important;
+    /* Increased margin */
+    position: relative;
+    z-index: 5;
+}
+
+.nav-tabs .nav-link {
+    padding: 6px 12px !important;
+    /* Reduced padding */
+    font-size: 0.85rem !important;
+    /* Smaller font */
+    line-height: 1.2 !important;
+}
+
+/* Fix for modal headers */
+.modal-header {
+    padding: 10px 15px !important;
+    /* Reduced padding */
+    min-height: 50px !important;
+}
+
+.modal-body {
+    padding: 12px 15px !important;
+    /* Reduced padding */
+}
+
+/* Fix for alert messages */
+.alert {
+    margin-bottom: 20px !important;
+    /* Increased margin */
+    padding: 8px 12px !important;
+    /* Reduced padding */
+    position: relative;
+    z-index: 15;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    #top-navbar .container {
+        padding-left: 50px !important;
+        /* Slightly reduced left shift for medium screens */
+    }
+
+    #top-navbar .nav-wrapper {
+        margin-left: 25px !important;
+        /* Reduced left shift for medium screens */
+    }
+
+    #top-navbar .site-title {
+        font-size: 1rem !important;
+    }
+
+    #top-navbar .form-header {
+        min-width: 250px !important;
+        max-width: 350px !important;
+    }
+}
+
+@media (max-width: 992px) {
+    #top-navbar .container {
+        padding-left: 40px !important;
+        /* Further reduced left shift for smaller screens */
+    }
+
+    #top-navbar .nav-wrapper {
+        margin-left: 20px !important;
+        /* Further reduced left shift for smaller screens */
+    }
+
+    #top-navbar .site-title {
+        font-size: 0.9rem !important;
+    }
+
+    #top-navbar .form-header {
+        min-width: 220px !important;
+        max-width: 300px !important;
+    }
+
+    #top-navbar .form-header .form-control {
+        font-size: 0.85rem !important;
+    }
+}
+
+@media (max-width: 800px) {
+    #main {
+        padding-top: 170px !important;
+        /* Reduced for shorter ticker */
+    }
+
+    #top-navbar {
+        min-height: 130px !important;
+        /* Increased height for mobile */
+        padding: 20px 0 !important;
+    }
+
+    #top-navbar .container {
+        padding-left: 30px !important;
+        /* Reduced left shift for mobile */
+    }
+
+    #top-navbar .nav-wrapper {
+        flex-direction: column !important;
+        gap: 12px !important;
+        /* Increased gap */
+        align-items: stretch !important;
+        min-height: 90px !important;
+        /* Increased minimum height */
+        margin-left: 15px !important;
+        /* Reduced left shift for mobile */
+    }
+
+    #top-navbar .site-title {
+        font-size: 0.95rem !important;
+        margin-bottom: 10px !important;
+        /* Increased margin */
+    }
+
+    #top-navbar .form-header {
+        min-width: 100% !important;
+        max-width: 100% !important;
+        order: 2 !important;
+        height: 45px !important;
+        /* Increased height on mobile */
+    }
+
+    #top-navbar .form-header .form-control,
+    #top-navbar .form-header .btn {
+        height: 45px !important;
+        /* Increased height on mobile */
+    }
+
+    #top-navbar .toggle-btn {
+        position: absolute !important;
+        top: 20px !important;
+        /* Adjusted position */
+        left: 20px !important;
+        /* Adjusted position */
+        width: 45px !important;
+        height: 45px !important;
+        font-size: 1.2rem !important;
+    }
+
+    #top-navbar .dropdown {
+        position: absolute !important;
+        top: 20px !important;
+        /* Adjusted position */
+        right: 20px !important;
+        /* Adjusted position */
+    }
+
+    #top-navbar .avatar {
+        width: 45px !important;
+        height: 45px !important;
+    }
+
+    .announcement-ticker {
+        margin-bottom: 8px !important;
+        /* Reduced margin */
+        padding: 10px 12px !important;
+        /* Reduced padding */
+        height: 45px !important;
+        /* Slightly smaller height */
+    }
+
+    .ticker-container {
+        max-height: 40px !important;
+        /* Shorter height */
+    }
+
+    .ticker-content {
+        animation-duration: 20s !important;
+        /* Faster animation on mobile */
+        font-size: 0.9rem !important;
+    }
+
+    .ticker-item {
+        padding: 5px 12px !important;
+        /* Reduced padding */
+        margin-right: 30px !important;
+        /* Reduced margin */
+        font-size: 0.9rem !important;
+        /* Smaller font */
+    }
+
+    .ticker-item i {
+        font-size: 0.9rem !important;
+        margin-right: 6px !important;
+    }
+
+    .card-header .btn {
+        font-size: 0.75rem !important;
+        /* Even smaller buttons */
+        padding: 4px 6px !important;
+    }
+
+    .container-fluid,
+    .container {
+        padding-top: 20px !important;
+        margin-top: 15px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    .announcement-ticker {
+        padding: 10px 12px !important;
+        /* Reduced padding */
+        height: 45px !important;
+        /* Slightly smaller height */
+    }
+
+    .ticker-item {
+        padding: 5px 12px !important;
+        /* Reduced padding */
+        margin-right: 30px !important;
+        /* Reduced margin */
+        font-size: 0.9rem !important;
+        /* Smaller font */
+    }
+
+    .ticker-content {
+        animation-duration: 18s !important;
+        /* Faster animation on mobile */
+        font-size: 0.9rem !important;
+    }
+
+    .ticker-item {
+        padding: 5px 12px !important;
+        /* Reduced padding */
+        margin-right: 30px !important;
+        /* Reduced margin */
+        font-size: 0.9rem !important;
+        /* Smaller font */
+    }
+
+    .ticker-item i {
+        font-size: 0.9rem !important;
+        margin-right: 6px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    #main {
+        padding-top: 180px !important;
+        /* Reduced for shorter ticker */
+    }
+
+    #top-navbar {
+        min-height: 140px !important;
+        /* Further increased height */
+    }
+
+    #top-navbar .container {
+        padding-left: 20px !important;
+        /* Minimal left shift for very small screens */
+    }
+
+    #top-navbar .nav-wrapper {
+        min-height: 100px !important;
+        /* Further increased minimum height */
+        margin-left: 10px !important;
+        /* Minimal left shift for very small screens */
+    }
+
+    .card-body {
+        padding: 8px 12px !important;
+        /* Further reduced padding */
+    }
+
+    .btn {
+        font-size: 0.75rem !important;
+        /* Even smaller buttons */
+        padding: 4px 6px !important;
+    }
+
+    .table thead th,
+    .table tbody td {
+        padding: 4px 2px !important;
+        /* Further reduced padding */
+        font-size: 0.8rem !important;
+        /* Even smaller font */
+    }
+
+    .announcement-ticker {
+        padding: 8px 10px !important;
+        /* Further reduced padding */
+        height: 60px !important;
+        /* Smaller height */
+    }
+
+    .ticker-item {
+        padding: 4px 10px !important;
+        /* Further reduced padding */
+        margin-right: 25px !important;
+        /* Further reduced margin */
+        font-size: 0.85rem !important;
+        /* Even smaller font */
+    }
+
+    .ticker-item i {
+        font-size: 0.85rem !important;
+        margin-right: 5px !important;
+    }
+
+    .form-header {
+        margin: 0 5px !important;
+    }
+
+    .toggle-btn {
+        margin-right: 5px !important;
+    }
+}
+
+/* Specific fixes for attendance pages */
+.attendance-lecturer-container {
+    margin-top: 25px !important;
+    /* Increased margin */
+    padding-top: 20px !important;
+    /* Increased padding */
+    position: relative;
+    z-index: 5;
+}
+
+.attendance-lecturer-container .card {
+    margin-bottom: 20px !important;
+    position: relative;
+    z-index: 10;
+}
+
+.attendance-lecturer-container .btn {
+    margin: 3px !important;
+    /* Increased margin */
+    font-size: 0.8rem !important;
+    /* Smaller buttons */
+    padding: 5px 10px !important;
+}
+
+/* Fix for course management pages */
+.course-management-container {
+    margin-top: 20px !important;
+    /* Increased margin */
+    padding-top: 15px !important;
+    /* Increased padding */
+    position: relative;
+    z-index: 5;
+}
+
+/* Fix for student management pages */
+.student-management-container {
+    margin-top: 20px !important;
+    /* Increased margin */
+    padding-top: 15px !important;
+    /* Increased padding */
+    position: relative;
+    z-index: 5;
+}
+
+/* Fix for admin dashboard */
+.admin-dashboard-container {
+    margin-top: 20px !important;
+    /* Increased margin */
+    padding-top: 15px !important;
+    /* Increased padding */
+    position: relative;
+    z-index: 5;
+}
+
+/* Ensure all action buttons are visible */
+.action-buttons {
+    position: relative;
+    z-index: 30;
+    /* Increased z-index */
+    margin-top: 8px !important;
+    /* Increased margin */
+    padding: 5px 0 !important;
+}
+
+.action-buttons .btn {
+    margin: 3px !important;
+    /* Increased margin */
+    position: relative;
+    z-index: 35;
+    /* Increased z-index */
+    font-size: 0.8rem !important;
+    padding: 5px 10px !important;
+}
+
+/* Fix for any floating elements */
+.floating-elements {
+    position: relative;
+    z-index: 25;
+    /* Increased z-index */
+    margin-top: 10px !important;
+}
+
+/* Additional fixes for specific elements that might be hidden */
+.manage-wrap {
+    margin-top: 15px !important;
+    margin-bottom: 15px !important;
+    position: relative;
+    z-index: 20;
+}
+
+.title-1 {
+    margin-top: 15px !important;
+    margin-bottom: 15px !important;
+    position: relative;
+    z-index: 10;
+}
+
+/* Fix for breadcrumb navigation */
+.breadcrumb {
+    margin-top: 15px !important;
+    margin-bottom: 15px !important;
+    position: relative;
+    z-index: 10;
+    padding: 8px 12px !important;
+}
+
+/* Fix for any dropdown menus */
+.dropdown-menu {
+    position: relative;
+    z-index: 1000 !important;
+    margin-top: 5px !important;
+}
+
+/* Fix for any tooltips or popovers */
+.tooltip,
+.popover {
+    z-index: 9999 !important;
+}
+
+/* Ensure proper spacing for all content sections */
+.content-section {
+    margin-top: 20px !important;
+    padding-top: 15px !important;
+    position: relative;
+    z-index: 5;
+}
+
+/* Fix for any sticky elements */
+.sticky-top {
+    top: 100px !important;
+    /* Account for fixed header */
+    z-index: 100 !important;
+}
+
+/* Additional safety margin for all main content */
+.main-content {
+    margin-top: 20px !important;
+    padding-top: 15px !important;
+    position: relative;
+    z-index: 5;
+}
+
+/* Fix for any inline elements that might be hidden */
+.inline-elements {
+    position: relative;
+    z-index: 15;
+    margin: 5px 0 !important;
+}
+
+/* Ensure proper spacing for all interactive elements */
+.interactive-elements {
+    position: relative;
+    z-index: 20;
+    margin: 5px 0 !important;
+}
+
+.btn-primary,
+.btn-dark {
+    background-color: var(--brand-primary) !important;
+    border-color: var(--brand-primary) !important;
+}
+
+.btn-primary:hover,
+.btn-dark:hover {
+    background-color: var(--brand-primary-2) !important;
+    border-color: var(--brand-primary-2) !important;
+}
+
+a {
+    color: var(--brand-primary);
+}
+
+a:hover {
+    color: var(--brand-primary-2);
+}
+
+body {
+    background: #f4f7fb !important;
+    padding-top: 0 !important;
+    /* Remove any body padding */
+}
+
+.footer {
+    background-color: #0f2f59 !important;
+    color: #e6eef8;
+}
+
+/* Enhanced ticker animation */
+@keyframes ticker {
+    0% {
+        transform: translateX(100%);
+        opacity: 1;
+    }
+
+    10% {
+        transform: translateX(0%);
+        opacity: 1;
+    }
+
+    90% {
+        transform: translateX(-100%);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateX(-200%);
+        opacity: 1;
+    }
+}
+
+/* Properly align announcement ticker below the navbar */
+.announcement-ticker {
+    position: absolute !important;
+    /* Fix it relative to navbar */
+    top: 100% !important;
+    /* Place directly below navbar */
+    left: 0 !important;
+    right: 0 !important;
+    margin: 0 auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 50px !important;
+    /* Standard height */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    padding: 0 16px !important;
+    border-radius: 0 !important;
+    /* Remove rounded corners for flush alignment */
+    border-top: 1px solid rgba(11, 75, 140, 0.2) !important;
+    border-bottom: 1px solid rgba(11, 75, 140, 0.2) !important;
+    z-index: 1100 !important;
+}
+
+/* Ensure ticker text flows neatly */
+.ticker-container {
+    width: 100% !important;
+    overflow: hidden !important;
+    white-space: nowrap !important;
+    display: flex !important;
+    align-items: center !important;
+}
+
+.ticker-content {
+    display: inline-flex !important;
+    align-items: center !important;
+    animation: marquee 20s linear infinite !important;
+}
+
+/* Adjust main content spacing (navbar + ticker) */
+#main {
+    padding-top: 190px !important;
+    /* Navbar height (120px) + ticker height (50px) + margin */
+}
+
+.ticker-item {
+    display: inline-flex !important;
+    align-items: center !important;
+    /* Vertically center */
+    padding: 6px 16px !important;
+    /* Proper padding */
+    margin-right: 40px !important;
+    /* Space between items */
+    color: #0b4b8c !important;
+    font-weight: 500 !important;
+    font-size: 0.95rem !important;
+    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
+    background: rgba(255, 255, 255, 0.8) !important;
+    border-radius: 6px !important;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
+    transition: all 0.3s ease !important;
+    border: 1px solid rgba(11, 75, 140, 0.15) !important;
+    cursor: pointer !important;
+    /* Make clickable */
+    text-decoration: none !important;
+    /* Remove default link styling */
+    white-space: nowrap !important;
+}
+
+.ticker-item:hover {
+    background: rgba(255, 255, 255, 0.95) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
+    border-color: rgba(11, 75, 140, 0.3) !important;
+    color: #0b4b8c !important;
+    text-decoration: none !important;
+}
+
+.ticker-item i {
+    color: #007bff !important;
+    margin-right: 8px !important;
+    font-size: 1rem !important;
+    flex-shrink: 0 !important;
+    /* Prevent icon from shrinking */
+}
+
+/* Minimal fix for dropdown overlap */
+.dropdown-menu {
+    z-index: 1400 !important;
+    /* Ensure dropdown appears above ticker */
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    margin-top: 5px !important;
+    min-width: 200px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+@keyframes marquee {
+    0% {
+        transform: translateX(100%);
+    }
+
+    100% {
+        transform: translateX(-100%);
+    }
+}
+
+.ticker-container:hover .ticker-content {
+    animation-play-state: paused !important;
+}
+
+@media (max-width: 768px) {
+    .announcement-ticker {
+        padding: 10px 12px !important;
+        /* Reduced padding */
+        height: 45px !important;
+        /* Slightly smaller height */
+    }
+
+    .ticker-content {
+        animation-duration: 18s !important;
+        /* Faster animation on mobile */
+        font-size: 0.9rem !important;
+    }
+
+    .ticker-item {
+        padding: 5px 12px !important;
+        /* Reduced padding */
+        margin-right: 30px !important;
+        /* Reduced margin */
+        font-size: 0.9rem !important;
+        /* Smaller font */
+    }
+
+    .ticker-item i {
+        font-size: 0.9rem !important;
+        margin-right: 6px !important;
+    }
+}
+
+@media (max-width: 576px) {
+    .announcement-ticker {
+        padding: 8px 10px !important;
+        /* Further reduced padding */
+        height: 40px !important;
+        /* Smaller height */
+    }
+
+    .ticker-content {
+        animation-duration: 16s !important;
+        /* Even faster animation */
+        font-size: 0.85rem !important;
+    }
+
+    .ticker-item {
+        padding: 4px 10px !important;
+        /* Further reduced padding */
+        margin-right: 25px !important;
+        /* Further reduced margin */
+        font-size: 0.85rem !important;
+        /* Even smaller font */
+    }
+
+    .ticker-item i {
+        font-size: 0.85rem !important;
+        margin-right: 5px !important;
+    }
+}
