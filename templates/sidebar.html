@@ -123,6 +123,9 @@
 			<li class="{% if request.path == sem %}active{% endif %}">
 				<a href="{% url 'semester_list' %}"><i class="fas fa-calendar-alt"></i>{% trans 'Manage Semester' %}</a>
 			</li>
+			<li class="{% if 'tuition-fees' in request.path %}active{% endif %}">
+				<a href="{% url 'tuition_fee_dashboard' %}"><i class="fas fa-dollar-sign"></i>{% trans 'Tuition Fee Management' %}</a>
+			</li>
 			{% endif %}
 
 			{% if request.user.is_lecturer %}
@@ -143,6 +146,9 @@
 			</li>
 			<li class="{% if request.path == cr %}active{% endif %}">
 				<a href="{% url 'course_registration' %}"><i class="fas fa-plus"></i>{% trans 'Add' %} &amp; {% trans 'Drop Course' %}</a>
+			</li>
+			<li class="{% if 'tuition-fees' in request.path %}active{% endif %}">
+				<a href="{% url 'student_tuition_fees' request.user.id %}"><i class="fas fa-dollar-sign"></i>{% trans 'My Tuition Fees' %}</a>
 			</li>
 			{% endif %}
 			<br />

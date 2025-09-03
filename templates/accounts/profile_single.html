@@ -153,6 +153,20 @@
                     <p><strong>{% trans 'Level' %}: </strong>{{ level.level }}</p>
                     <p><strong>{% trans 'Program' %}: </strong>{{ student.program }}</p>
                 </div>
+                
+                <hr>
+                <p class="fw-bold"><i class="me-2 fas fa-dollar-sign"></i> {% trans 'Tuition Fees' %}</p>
+                <div class="dashboard-description">
+                    <p><strong>{% trans 'Fee Status' %}:</strong> 
+                        <a href="{% url 'student_tuition_fees' user.id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-eye me-1"></i> {% trans 'View Fee Details' %}
+                        </a>
+                    </p>
+                    <p class="text-muted small">
+                        <i class="fas fa-info-circle me-1"></i> 
+                        {% trans 'Click to view your semester-wise tuition fee status and payment history' %}
+                    </p>
+                </div>
                 {% endif %}
     
                 <hr>

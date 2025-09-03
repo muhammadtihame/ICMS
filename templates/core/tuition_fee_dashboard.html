@@ -1,0 +1,274 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tuition Fee Management Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                        <li class="breadcrumb-item active">Tuition Fee Management</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Tuition Fee Management Dashboard</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="avatar-sm bg-soft-primary rounded">
+                                <i class="fe-users avatar-title font-20 text-primary"></i>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-end">
+                                <h3 class="text-dark my-1"><span data-plugin="counterup">{{ total_students }}</span></h3>
+                                <p class="text-muted mb-1 text-truncate">Total Students</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="avatar-sm bg-soft-warning rounded">
+                                <i class="fe-clock avatar-title font-20 text-warning"></i>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-end">
+                                <h3 class="text-dark my-1"><span data-plugin="counterup">{{ pending_fees }}</span></h3>
+                                <p class="text-muted mb-1 text-truncate">Pending Fees</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="avatar-sm bg-soft-danger rounded">
+                                <i class="fe-alert-triangle avatar-title font-20 text-danger"></i>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-end">
+                                <h3 class="text-dark my-1"><span data-plugin="counterup">{{ overdue_fees }}</span></h3>
+                                <p class="text-muted mb-1 text-truncate">Overdue Fees</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="avatar-sm bg-soft-success rounded">
+                                <i class="fe-check-circle avatar-title font-20 text-success"></i>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-end">
+                                <h3 class="text-dark my-1"><span data-plugin="counterup">{{ paid_fees }}</span></h3>
+                                <p class="text-muted mb-1 text-truncate">Paid Fees</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row mb-3">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <a href="{% url 'bulk_update_tuition_fees' %}" class="btn btn-primary">
+                                <i class="fe-settings mr-1"></i> Bulk Update Fees
+                            </a>
+                            <a href="{% url 'tuition_fee_reports' %}" class="btn btn-info">
+                                <i class="fe-download mr-1"></i> Generate Reports
+                            </a>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <a href="{% url 'admin:core_studenttuitionfee_changelist' %}" class="btn btn-secondary">
+                                <i class="fe-database mr-1"></i> Admin Panel
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Semester Fee Configuration -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title">Semester Fee Configuration</h4>
+                    <p class="text-muted mb-0">Configure due dates and amounts for each semester</p>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Semester</th>
+                                    <th>Due Date</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fee in semester_fees %}
+                                <tr>
+                                    <td>
+                                        <span class="badge bg-primary">Semester {{ fee.semester }}</span>
+                                    </td>
+                                    <td>{{ fee.due_date|date:"M d, Y" }}</td>
+                                    <td>${{ fee.amount }}</td>
+                                    <td>
+                                        {% if fee.is_active %}
+                                            <span class="badge bg-success">Active</span>
+                                        {% else %}
+                                            <span class="badge bg-secondary">Inactive</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{% url 'admin:core_tuitionfee_change' fee.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fe-edit-2"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted">
+                                        No semester fee configuration found. 
+                                        <a href="{% url 'admin:core_tuitionfee_add' %}">Add configuration</a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Fee Updates -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title">Recent Fee Updates</h4>
+                    <p class="text-muted mb-0">Latest changes to student tuition fees</p>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Student</th>
+                                    <th>Semester</th>
+                                    <th>Status</th>
+                                    <th>Amount Paid</th>
+                                    <th>Updated</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fee in recent_fees %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-soft-primary rounded-circle mr-3">
+                                                <span class="avatar-title">{{ fee.student.first_name|first }}{{ fee.student.last_name|first }}</span>
+                                            </div>
+                                            <div>
+                                                <h5 class="font-14 my-1 font-weight-normal">{{ fee.student.get_full_name }}</h5>
+                                                <span class="text-muted font-12">{{ fee.student.username }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">Semester {{ fee.semester }}</span>
+                                    </td>
+                                    <td>
+                                        {% if fee.is_paid %}
+                                            <span class="badge bg-success">Paid</span>
+                                        {% elif fee.is_overdue %}
+                                            <span class="badge bg-danger">Overdue</span>
+                                        {% else %}
+                                            <span class="badge bg-warning">Pending</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>${{ fee.amount_paid }}</td>
+                                    <td>{{ fee.updated_at|timesince }} ago</td>
+                                    <td>
+                                        <a href="{% url 'update_tuition_fee' fee.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fe-edit-2"></i>
+                                        </a>
+                                        <a href="{% url 'student_tuition_fees' fee.student.id %}" class="btn btn-sm btn-outline-info">
+                                            <i class="fe-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted">
+                                        No recent fee updates found.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Initialize counter animation
+        if (typeof $.fn.counterUp !== 'undefined') {
+            $('[data-plugin="counterup"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+        }
+    });
+</script>
+{% endblock %}

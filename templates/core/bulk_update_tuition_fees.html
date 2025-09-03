@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bulk Update Tuition Fees{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'tuition_fee_dashboard' %}">Tuition Fees</a></li>
+                        <li class="breadcrumb-item active">Bulk Update</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Bulk Update Tuition Fees</h4>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title">
+                        <i class="fe-settings mr-2"></i>
+                        Update Tuition Fees for All Students
+                    </h4>
+                    <p class="text-muted mb-0">This will update the due date and amount for a specific semester across all students</p>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.semester.id_for_label }}" class="form-label">
+                                        Semester <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.semester }}
+                                    {% if form.semester.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.semester.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Select which semester to update</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.amount.id_for_label }}" class="form-label">
+                                        Fee Amount <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.amount }}
+                                    {% if form.amount.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.amount.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Standard fee amount for this semester</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.due_date.id_for_label }}" class="form-label">
+                                        Due Date <span class="text-danger">*</span>
+                                    </label>
+                                    {{ form.due_date }}
+                                    {% if form.due_date.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.due_date.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">When the fee is due for all students</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="{{ form.send_notifications.id_for_label }}" class="form-label">Email Notifications</label>
+                                    <div class="custom-control custom-checkbox">
+                                        {{ form.send_notifications }}
+                                        <label class="custom-control-label" for="{{ form.send_notifications.id_for_label }}">
+                                            Send email notifications to all students
+                                        </label>
+                                    </div>
+                                    {% if form.send_notifications.errors %}
+                                        <div class="invalid-feedback d-block">
+                                            {{ form.send_notifications.errors.0 }}
+                                        </div>
+                                    {% endif %}
+                                    <small class="form-text text-muted">Notify students about the updated due date</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Warning Alert -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="alert alert-warning">
+                                    <h6 class="alert-heading"><i class="fe-alert-triangle mr-2"></i>Important Notice</h6>
+                                    <ul class="mb-0">
+                                        <li>This action will update <strong>ALL STUDENTS</strong> for the selected semester</li>
+                                        <li>Existing payment records will not be affected</li>
+                                        <li>Only due dates and amounts will be updated</li>
+                                        <li>This action cannot be undone</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Preview Section -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="card bg-light">
+                                    <div class="card-header">
+                                        <h6 class="card-title mb-0">Update Preview</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-3">
+                                                <strong>Semester:</strong> 
+                                                <span id="preview-semester">-</span>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>Due Date:</strong> 
+                                                <span id="preview-due-date">-</span>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>Amount:</strong> 
+                                                <span id="preview-amount">-</span>
+                                            </div>
+                                            <div class="col-md-3">
+                                                <strong>Students Affected:</strong> 
+                                                <span id="preview-students">-</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <button type="submit" class="btn btn-primary" id="submit-btn" disabled>
+                                        <i class="fe-save mr-1"></i> Update All Students
+                                    </button>
+                                    <a href="{% url 'tuition_fee_dashboard' %}" class="btn btn-secondary">
+                                        <i class="fe-arrow-left mr-1"></i> Back to Dashboard
+                                    </a>
+                                    <button type="button" class="btn btn-outline-info" id="preview-btn">
+                                        <i class="fe-eye mr-1"></i> Preview Update
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .custom-control-input:checked ~ .custom-control-label::before {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    .form-control:focus {
+        border-color: #007bff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    .card.bg-light {
+        border: 1px solid #dee2e6;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Preview functionality
+        $('#preview-btn').on('click', function() {
+            var semester = $('#{{ form.semester.id_for_label }}').val();
+            var dueDate = $('#{{ form.due_date.id_for_label }}').val();
+            var amount = $('#{{ form.amount.id_for_label }}').val();
+            
+            if (semester && dueDate && amount) {
+                $('#preview-semester').text('Semester ' + semester);
+                $('#preview-due-date').text(dueDate);
+                $('#preview-amount').text('$' + parseFloat(amount).toFixed(2));
+                $('#preview-students').text('All Students');
+                
+                // Enable submit button
+                $('#submit-btn').prop('disabled', false);
+                
+                // Show success message
+                $(this).removeClass('btn-outline-info').addClass('btn-success').html('<i class="fe-check mr-1"></i> Preview Ready');
+            } else {
+                alert('Please fill in all required fields before previewing.');
+            }
+        });
+
+        // Form validation
+        $('form').on('submit', function(e) {
+            var semester = $('#{{ form.semester.id_for_label }}').val();
+            var dueDate = $('#{{ form.due_date.id_for_label }}').val();
+            var amount = $('#{{ form.amount.id_for_label }}').val();
+            
+            if (!semester || !dueDate || !amount) {
+                e.preventDefault();
+                alert('Please fill in all required fields.');
+                return false;
+            }
+            
+            // Confirm action
+            return confirm('Are you sure you want to update tuition fees for ALL STUDENTS in Semester ' + semester + '? This action cannot be undone.');
+        });
+
+        // Auto-enable submit button when all fields are filled
+        $('input, select').on('change', function() {
+            var semester = $('#{{ form.semester.id_for_label }}').val();
+            var dueDate = $('#{{ form.due_date.id_for_label }}').val();
+            var amount = $('#{{ form.amount.id_for_label }}').val();
+            
+            if (semester && dueDate && amount) {
+                $('#submit-btn').prop('disabled', false);
+            } else {
+                $('#submit-btn').prop('disabled', true);
+            }
+        });
+    });
+</script>
+{% endblock %}

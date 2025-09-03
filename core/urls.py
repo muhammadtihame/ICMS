@@ -39,6 +39,11 @@ from .views import (
     feedback_view,
     search_suggestions_api,
     universal_search_demo_view,
+    tuition_fee_dashboard,
+    student_tuition_fees,
+    update_tuition_fee,
+    bulk_update_tuition_fees,
+    tuition_fee_reports,
 )
 
 
@@ -96,4 +101,11 @@ urlpatterns = [
     
     # Universal Search Demo
     path('universal-search-demo/', universal_search_demo_view, name='universal_search_demo'),
+
+    # Tuition Fee Management
+    path('tuition-fees/', tuition_fee_dashboard, name='tuition_fee_dashboard'),
+    path('tuition-fees/student/<int:student_id>/', student_tuition_fees, name='student_tuition_fees'),
+    path('tuition-fees/update/<int:fee_id>/', update_tuition_fee, name='update_tuition_fee'),
+    path('tuition-fees/bulk-update/', bulk_update_tuition_fees, name='bulk_update_tuition_fees'),
+    path('tuition-fees/reports/', tuition_fee_reports, name='tuition_fee_reports'),
 ]

@@ -1,0 +1,263 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ student.get_full_name }} - Tuition Fees{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'tuition_fee_dashboard' %}">Tuition Fees</a></li>
+                        <li class="breadcrumb-item active">{{ student.get_full_name }}</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">{{ student.get_full_name }} - Tuition Fees</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Student Information -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-8">
+                            <h5 class="card-title">{{ student.get_full_name }}</h5>
+                            <p class="text-muted mb-0">
+                                <strong>Student ID:</strong> {{ student.username }} | 
+                                <strong>Email:</strong> {{ student.email }} | 
+                                <strong>Program:</strong> 
+                                {% if student.student.program %}
+                                    {{ student.student.program.title }}
+                                {% else %}
+                                    Not Assigned
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            {% if request.user.is_staff %}
+                            <a href="{% url 'admin:accounts_user_change' student.id %}" class="btn btn-outline-primary">
+                                <i class="fe-edit-2 mr-1"></i> Edit Student
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tuition Fee Summary -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="avatar-sm bg-soft-info rounded">
+                                <i class="fe-dollar-sign avatar-title font-20 text-info"></i>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-end">
+                                <h3 class="text-dark my-1">${{ total_paid|floatformat:2 }}</h3>
+                                <p class="text-muted mb-1 text-truncate">Total Paid</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="avatar-sm bg-soft-warning rounded">
+                                <i class="fe-clock avatar-title font-20 text-warning"></i>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-end">
+                                <h3 class="text-dark my-1">${{ total_due|floatformat:2 }}</h3>
+                                <p class="text-muted mb-1 text-truncate">Total Due</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="avatar-sm bg-soft-success rounded">
+                                <i class="fe-check-circle avatar-title font-20 text-success"></i>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-end">
+                                <h3 class="text-dark my-1">{{ tuition_fees|length }}</h3>
+                                <p class="text-muted mb-1 text-truncate">Total Semesters</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="avatar-sm bg-soft-danger rounded">
+                                <i class="fe-alert-triangle avatar-title font-20 text-danger"></i>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-end">
+                                <h3 class="text-dark my-1">
+                                    {{ tuition_fees|length|add:"-1"|add:"-1"|add:"1" }}
+                                </h3>
+                                <p class="text-muted mb-1 text-truncate">Completed</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tuition Fee Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title">Semester-wise Tuition Fees</h4>
+                    <p class="text-muted mb-0">8-semester breakdown with payment status</p>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Semester</th>
+                                    <th>Amount Paid</th>
+                                    <th>Payment Date</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fee in tuition_fees %}
+                                <tr class="{% if fee.is_overdue %}table-danger{% elif fee.is_paid %}table-success{% endif %}">
+                                    <td>
+                                        <span class="badge bg-primary">Semester {{ fee.semester }}</span>
+                                    </td>
+                                    <td>
+                                        {% if fee.amount_paid > 0 %}
+                                            <span class="text-success font-weight-bold">${{ fee.amount_paid|floatformat:2 }}</span>
+                                        {% else %}
+                                            <span class="text-muted">$0.00</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if fee.payment_date %}
+                                            <span class="text-success">{{ fee.payment_date|date:"M d, Y" }}</span>
+                                        {% else %}
+                                            <span class="text-muted">Not Paid</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if fee.is_overdue %}
+                                            <span class="text-danger font-weight-bold">
+                                                {{ fee.due_date|date:"M d, Y" }}
+                                                <i class="fe-alert-triangle ml-1"></i>
+                                            </span>
+                                        {% else %}
+                                            <span class="{% if fee.is_paid %}text-success{% else %}text-warning{% endif %}">
+                                                {{ fee.due_date|date:"M d, Y" }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if fee.is_paid %}
+                                            <span class="badge bg-success">
+                                                <i class="fe-check-circle mr-1"></i> Paid
+                                            </span>
+                                        {% elif fee.is_overdue %}
+                                            <span class="badge bg-danger">
+                                                <i class="fe-alert-triangle mr-1"></i> Overdue
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-warning">
+                                                <i class="fe-clock mr-1"></i> Pending
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if request.user.is_staff %}
+                                        <a href="{% url 'update_tuition_fee' fee.id %}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fe-edit-2"></i> Edit
+                                        </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Instructions -->
+    {% if not request.user.is_staff %}
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title">Payment Instructions</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <h5 class="alert-heading"><i class="fe-info mr-2"></i>Important Information</h5>
+                        <ul class="mb-0">
+                            <li>Tuition fees are due on the specified due date for each semester</li>
+                            <li>Late payments may incur additional charges</li>
+                            <li>Contact the administration office for payment arrangements</li>
+                            <li>Keep payment receipts for your records</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table-danger {
+        background-color: rgba(220, 53, 69, 0.1) !important;
+    }
+    .table-success {
+        background-color: rgba(40, 167, 69, 0.1) !important;
+    }
+    .badge i {
+        font-size: 0.8em;
+    }
+</style>
+{% endblock %}

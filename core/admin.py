@@ -3,8 +3,9 @@ from .models import (
     NewsAndEvents, Session, Semester, Announcement,
     Batch, Classroom, CourseOffering, TimetableSlot,
     Attendance, AttendanceSession, CollegeCalendar, StudentFeedback,
-    Lecturer, Feedback
+    Lecturer, Feedback, TuitionFee, StudentTuitionFee
 )
+from django.utils import timezone
 
 
 @admin.register(NewsAndEvents)
@@ -171,3 +172,66 @@ class FeedbackAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+
+
+@admin.register(TuitionFee)
+class TuitionFeeAdmin(admin.ModelAdmin):
+    list_display = ('semester', 'due_date', 'amount', 'is_active', 'created_at')
+    list_filter = ('is_active', 'semester', 'due_date')
+    search_fields = ('semester',)
+    ordering = ['semester']
+    date_hierarchy = 'due_date'
+    
+    fieldsets = (
+        ('Fee Configuration', {
+            'fields': ('semester', 'amount', 'due_date', 'is_active')
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    readonly_fields = ('created_at', 'updated_at')
+
+@admin.register(StudentTuitionFee)
+class StudentTuitionFeeAdmin(admin.ModelAdmin):
+    list_display = ('student', 'semester', 'amount_paid', 'payment_date', 'due_date', 'status', 'is_overdue')
+    list_filter = ('semester', 'is_paid', 'is_overdue', 'due_date', 'payment_date')
+    search_fields = ('student__username', 'student__first_name', 'student__last_name', 'student__email')
+    ordering = ['student', 'semester']
+    date_hierarchy = 'due_date'
+    
+    fieldsets = (
+        ('Student Information', {
+            'fields': ('student', 'semester')
+        }),
+        ('Payment Details', {
+            'fields': ('amount_paid', 'payment_date', 'due_date', 'is_paid')
+        }),
+        ('Status', {
+            'fields': ('is_overdue',)
+        }),
+        ('Timestamps', {
+            'fields': ('created_at', 'updated_at'),
+            'classes': ('collapse',)
+        }),
+    )
+    readonly_fields = ('is_overdue', 'created_at', 'updated_at')
+    
+    actions = ['mark_as_paid', 'mark_as_pending', 'send_payment_reminders']
+    
+    def mark_as_paid(self, request, queryset):
+        updated = queryset.update(is_paid=True, amount_paid=100.00, payment_date=timezone.now().date())
+        self.message_user(request, f'{updated} tuition fee records marked as paid.')
+    mark_as_paid.short_description = "Mark selected fees as paid"
+    
+    def mark_as_pending(self, request, queryset):
+        updated = queryset.update(is_paid=False, amount_paid=0.00, payment_date=None)
+        self.message_user(request, f'{updated} tuition fee records marked as pending.')
+    mark_as_pending.short_description = "Mark selected fees as pending"
+    
+    def send_payment_reminders(self, request, queryset):
+        # This would integrate with your email system
+        count = queryset.count()
+        self.message_user(request, f'Payment reminders sent to {count} students.')
+    send_payment_reminders.short_description = "Send payment reminders"

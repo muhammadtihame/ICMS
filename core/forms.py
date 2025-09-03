@@ -11,6 +11,8 @@ from .models import (
     StudentFeedback,
     Feedback,
     CourseOffering,
+    TuitionFee,
+    StudentTuitionFee,
 )
 from accounts.models import User
 
@@ -348,3 +350,57 @@ class FeedbackForm(forms.ModelForm):
         if not (1 <= rating <= 5):
             raise forms.ValidationError("Rating must be between 1 and 5.")
         return rating
+
+class TuitionFeeForm(forms.ModelForm):
+    """Form for managing tuition fee configuration"""
+    class Meta:
+        model = TuitionFee
+        fields = ['semester', 'due_date', 'amount', 'is_active']
+        widgets = {
+            'semester': forms.Select(attrs={'class': 'form-control'}),
+            'due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+class StudentTuitionFeeForm(forms.ModelForm):
+    """Form for managing individual student tuition fees"""
+    class Meta:
+        model = StudentTuitionFee
+        fields = ['semester', 'amount_paid', 'payment_date', 'due_date', 'is_paid']
+        widgets = {
+            'semester': forms.Select(attrs={'class': 'form-control'}),
+            'amount_paid': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01', 'min': '0'}),
+            'payment_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'due_date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'is_paid': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Make semester read-only if editing existing record
+        if self.instance.pk:
+            self.fields['semester'].widget.attrs['readonly'] = True
+            self.fields['semester'].widget.attrs['class'] = 'form-control bg-light'
+
+class BulkTuitionFeeUpdateForm(forms.Form):
+    """Form for bulk updating tuition fees"""
+    semester = forms.ChoiceField(
+        choices=[(i, f'Semester {i}') for i in range(1, 9)],
+        widget=forms.Select(attrs={'class': 'form-control'})
+    )
+    due_date = forms.DateField(
+        widget=forms.DateInput(attrs={'class': 'form-control', 'type': 'date'})
+    )
+    amount = forms.DecimalField(
+        max_digits=10, 
+        decimal_places=2,
+        min_value=0,
+        widget=forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'})
+    )
+    send_notifications = forms.BooleanField(
+        required=False,
+        initial=True,
+        widget=forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        help_text="Send email notifications to all students"
+    )

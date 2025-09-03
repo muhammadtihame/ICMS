@@ -1,98 +1,52 @@
-![Group 23](https://github.com/user-attachments/assets/4e84251a-27b0-462b-bd5e-fb0bcadc4694)
+KCET: Kashmir College of Engineering & Technology Management System
 
-### The world’s most high-end designed, lightweight, and feature-rich learning management system.
+The world’s most high-end designed, lightweight, and feature-rich learning management system.
 
-# KCET: Kashmir College of Engineering & Technology Management System
+A comprehensive and proprietary college management system for Kashmir College of Engineering & Technology (KCET).
 
-A comprehensive college management system for Kashmir College of Engineering & Technology (KCET).
+⚠️ Notice: This software is copyrighted and all rights are reserved by Mohammad Tihame (2025).
 
-_Documentation is under development_
+No one is permitted to copy, use, modify, distribute, or contribute to this project without explicit written consent from the copyright holder.
 
-Let's enhance the project by contributing! 👩‍💻👩‍💻
+Features:
 
-<img width="1440" alt="screenshot" src="https://github.com/user-attachments/assets/08644f49-6ae0-4695-86cc-afe331c6f61a">
+Dashboard: School demographics and analytics (admin only).
+News and Events: Public access.
+Admin Panel: Manage students (Add, Update, Delete).
+Admin Panel: Manage lecturers (Add, Update, Delete).
+Students: Add and Drop courses.
+Lecturers: Submit students' scores (Attendance, Mid exam, Final exam, Assignments).
+Automatic calculation of Total, Average, GPA points, and Grades.
+Grade comments: Pass, Fail, or Pass with Warning.
+Assessment and grade result pages for students.
+Session/year and semester management.
+Assessments and grades grouped by semester.
+Upload video and documentation for each course.
+PDF generator for students' registration slip and grade result.
+Page access restriction.
+Quiz module with:
+Multiple choice, True/False, Essay (coming soon).
+Randomized question order.
+One attempt per user option.
+Pass marks, category-based success rate tracking.
+Review of previous quiz attempts.
+Explanations for answers.
+Marking page for essay questions.
 
-## Current features
+Requirements:
+Python 3.8+
 
-- Dashboard: School demographics and analytics. Restricted to only admins
-- News And Events: All users can access this page
-- Admin manages students(Add, Update, Delete)
-- Admin manages lecturers(Add, Update, Delete)
-- Students can Add and Drop courses
-- Lecturers submit students' scores: _Attendance, Mid exam, Final exam, assignment_
-- The system calculates students' _Total, average, point, and grades automatically_
-- Grade comment for each student with a **pass**, **fail**, or **pass with a warning**
-- Assessment result page for students
-- Grade result page for students
-- Session/year and semester management
-- Assessments and grades will be grouped by semester
-- Upload video and documentation for each course
-- PDF generator for students' registration slip and grade result
-- Page access restriction
-- Storing of quiz results under each user
-- Question order randomization
-- Previous quiz scores can be viewed on the category page
-- Correct answers can be shown after each question or all at once at the end
-- Logged-in users can return to an incomplete quiz to finish it and non-logged-in users can complete a quiz if their session persists
-- The quiz can be limited to one attempt per user
-- Questions can be given a category
-- Success rate for each category can be monitored on a progress page
-- Explanation for each question result can be given
-- Pass marks can be set
-- Multiple choice question type
-- True/False question type
-- Essay question type................._Coming soon_
-- Custom message displayed for those that pass or fail a quiz
-- Custom permission (view_sittings) added, allowing users with that permission to view quiz results from users
-- A marking page which lists completed quizzes, can be filtered by quiz or user, and is used to mark essay questions
+Installation:
+This project is not open for public contribution or usage.
+Installation instructions are restricted to authorized personnel only.
 
-# Quick note for future contributors
+License:
 
-If you would like to contribute, simply begin by implementing one from the list in the `TODO.md` file.
+📜 KCET License — All Rights Reserved
+Copyright (c) 2025 Mohammad Tihame
+This software is proprietary. No permission is granted to copy, use, modify, or distribute in any form without prior written consent.
 
-# Requirements:
+References:
 
-> The following program(s) are required to run the project
-
-- [Python3.8+](https://www.python.org/downloads/)
-
-# Installation
-
-- Clone the repo with
-
-```bash
-git clone https://github.com/your-repo/kcet-college-management.git
-```
-
-- Create and activate a python virtual environment
-
-```bash
-pip install -r requirements.txt
-```
-
-- Create `.env` file inside the root directory
-
-- Copy and paste everything in the `.env.example` file into the `.env` file. Don't forget to customize the variable values
-
-```bash
-python manage.py migrate
-```
-
-```bash
-python manage.py createsuperuser
-```
-
-```bash
-python manage.py runserver
-```
-
-Last but not least, go to this address http://127.0.0.1:8000
-
-#### _Check [this page](https://adilmohak.github.io/dj-lms-starter/) for more insight and support._
-
-# References
-
-- Quiz part: https://github.com/tomwalker/django_quiz
-
-#### Show your support by ⭐️ this project!
-# Intelligent_College_Management_System
+Quiz module base: https://github.com/tomwalker/django_quiz
+✨ Developed by Mohammad Tihame for Kashmir College of Engineering & Technology (KCET).

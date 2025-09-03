@@ -1,0 +1,342 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Tuition Fee Reports{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="page-title-box">
+                <div class="page-title-right">
+                    <ol class="breadcrumb m-0">
+                        <li class="breadcrumb-item"><a href="{% url 'home' %}">Home</a></li>
+                        <li class="breadcrumb-item"><a href="{% url 'tuition_fee_dashboard' %}">Tuition Fees</a></li>
+                        <li class="breadcrumb-item active">Reports</li>
+                    </ol>
+                </div>
+                <h4 class="page-title">Tuition Fee Reports</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title">Filter Options</h4>
+                </div>
+                <div class="card-body">
+                    <form method="get" class="row">
+                        <div class="col-md-3">
+                            <label for="status" class="form-label">Payment Status</label>
+                            <select name="status" id="status" class="form-control">
+                                <option value="">All Statuses</option>
+                                <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="overdue" {% if status_filter == 'overdue' %}selected{% endif %}>Overdue</option>
+                                <option value="paid" {% if status_filter == 'paid' %}selected{% endif %}>Paid</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="semester" class="form-label">Semester</label>
+                            <select name="semester" id="semester" class="form-control">
+                                <option value="">All Semesters</option>
+                                <option value="1" {% if semester_filter == '1' %}selected{% endif %}>Semester 1</option>
+                                <option value="2" {% if semester_filter == '2' %}selected{% endif %}>Semester 2</option>
+                                <option value="3" {% if semester_filter == '3' %}selected{% endif %}>Semester 3</option>
+                                <option value="4" {% if semester_filter == '4' %}selected{% endif %}>Semester 4</option>
+                                <option value="5" {% if semester_filter == '5' %}selected{% endif %}>Semester 5</option>
+                                <option value="6" {% if semester_filter == '6' %}selected{% endif %}>Semester 6</option>
+                                <option value="7" {% if semester_filter == '7' %}selected{% endif %}>Semester 7</option>
+                                <option value="8" {% if semester_filter == '8' %}selected{% endif %}>Semester 8</option>
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fe-filter mr-1"></i> Apply Filters
+                                </button>
+                                <a href="{% url 'tuition_fee_reports' %}" class="btn btn-secondary">
+                                    <i class="fe-refresh-cw mr-1"></i> Clear
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label">&nbsp;</label>
+                            <div>
+                                <a href="{% url 'tuition_fee_reports' %}?export=csv{% if status_filter %}&status={{ status_filter }}{% endif %}{% if semester_filter %}&semester={{ semester_filter }}{% endif %}" 
+                                   class="btn btn-success">
+                                    <i class="fe-download mr-1"></i> Export CSV
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Statistics -->
+    <div class="row">
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="avatar-sm bg-soft-info rounded">
+                                <i class="fe-users avatar-title font-20 text-info"></i>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-end">
+                                <h3 class="text-dark my-1"><span data-plugin="counterup">{{ fees.count }}</span></h3>
+                                <p class="text-muted mb-1 text-truncate">Total Records</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="avatar-sm bg-soft-success rounded">
+                                <i class="fe-check-circle avatar-title font-20 text-success"></i>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-end">
+                                <h3 class="text-dark my-1">
+                                    <span data-plugin="counterup">
+                                        {{ fees|length|add:"-1"|add:"-1"|add:"1" }}
+                                    </span>
+                                </h3>
+                                <p class="text-muted mb-1 text-truncate">Paid Fees</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="avatar-sm bg-soft-warning rounded">
+                                <i class="fe-clock avatar-title font-20 text-warning"></i>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-end">
+                                <h3 class="text-dark my-1">
+                                    <span data-plugin="counterup">
+                                        {{ fees|length|add:"-1"|add:"-1"|add:"1" }}
+                                    </span>
+                                </h3>
+                                <p class="text-muted mb-1 text-truncate">Pending Fees</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="avatar-sm bg-soft-danger rounded">
+                                <i class="fe-alert-triangle avatar-title font-20 text-danger"></i>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="text-end">
+                                <h3 class="text-dark my-1">
+                                    <span data-plugin="counterup">
+                                        {{ fees|length|add:"-1"|add:"-1"|add:"1" }}
+                                    </span>
+                                </h3>
+                                <p class="text-muted mb-1 text-truncate">Overdue Fees</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="header-title">Tuition Fee Report</h4>
+                    <p class="text-muted mb-0">
+                        Showing {{ fees.count }} records
+                        {% if status_filter %} | Status: {{ status_filter|title }}{% endif %}
+                        {% if semester_filter %} | Semester: {{ semester_filter }}{% endif %}
+                    </p>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-centered table-hover mb-0" id="reports-table">
+                            <thead>
+                                <tr>
+                                    <th>Student ID</th>
+                                    <th>Student Name</th>
+                                    <th>Semester</th>
+                                    <th>Amount Paid</th>
+                                    <th>Payment Date</th>
+                                    <th>Due Date</th>
+                                    <th>Status</th>
+                                    <th>Overdue</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for fee in fees %}
+                                <tr class="{% if fee.is_overdue %}table-danger{% elif fee.is_paid %}table-success{% endif %}">
+                                    <td>
+                                        <span class="font-weight-bold">{{ fee.student.username }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-soft-primary rounded-circle mr-3">
+                                                <span class="avatar-title">{{ fee.student.first_name|first }}{{ fee.student.last_name|first }}</span>
+                                            </div>
+                                            <div>
+                                                <h5 class="font-14 my-1 font-weight-normal">{{ fee.student.get_full_name }}</h5>
+                                                <span class="text-muted font-12">{{ fee.student.email }}</span>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-primary">Semester {{ fee.semester }}</span>
+                                    </td>
+                                    <td>
+                                        {% if fee.amount_paid > 0 %}
+                                            <span class="text-success font-weight-bold">${{ fee.amount_paid|floatformat:2 }}</span>
+                                        {% else %}
+                                            <span class="text-muted">$0.00</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if fee.payment_date %}
+                                            <span class="text-success">{{ fee.payment_date|date:"M d, Y" }}</span>
+                                        {% else %}
+                                            <span class="text-muted">Not Paid</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if fee.is_overdue %}
+                                            <span class="text-danger font-weight-bold">
+                                                {{ fee.due_date|date:"M d, Y" }}
+                                                <i class="fe-alert-triangle ml-1"></i>
+                                            </span>
+                                        {% else %}
+                                            <span class="{% if fee.is_paid %}text-success{% else %}text-warning{% endif %}">
+                                                {{ fee.due_date|date:"M d, Y" }}
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if fee.is_paid %}
+                                            <span class="badge bg-success">
+                                                <i class="fe-check-circle mr-1"></i> Paid
+                                            </span>
+                                        {% elif fee.is_overdue %}
+                                            <span class="badge bg-danger">
+                                                <i class="fe-alert-triangle mr-1"></i> Overdue
+                                            </span>
+                                        {% else %}
+                                            <span class="badge bg-warning">
+                                                <i class="fe-clock mr-1"></i> Pending
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        {% if fee.is_overdue %}
+                                            <span class="badge bg-danger">Yes</span>
+                                        {% else %}
+                                            <span class="badge bg-success">No</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{% url 'update_tuition_fee' fee.id %}" class="btn btn-sm btn-outline-primary">
+                                                <i class="fe-edit-2"></i>
+                                            </a>
+                                            <a href="{% url 'student_tuition_fees' fee.student.id %}" class="btn btn-sm btn-outline-info">
+                                                <i class="fe-eye"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="9" class="text-center text-muted">
+                                        No tuition fee records found matching the current filters.
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table-danger {
+        background-color: rgba(220, 53, 69, 0.1) !important;
+    }
+    .table-success {
+        background-color: rgba(40, 167, 69, 0.1) !important;
+    }
+    .badge i {
+        font-size: 0.8em;
+    }
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    $(document).ready(function() {
+        // Initialize counter animation
+        if (typeof $.fn.counterUp !== 'undefined') {
+            $('[data-plugin="counterup"]').counterUp({
+                delay: 10,
+                time: 1000
+            });
+        }
+
+        // DataTable initialization (if available)
+        if (typeof $.fn.DataTable !== 'undefined') {
+            $('#reports-table').DataTable({
+                pageLength: 25,
+                order: [[0, 'asc']],
+                responsive: true,
+                dom: 'Bfrtip',
+                buttons: [
+                    'copy', 'csv', 'excel', 'pdf', 'print'
+                ]
+            });
+        }
+    });
+</script>
+{% endblock %}

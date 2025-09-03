@@ -2,25 +2,30 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
+import csv
 from django.views.decorators.http import require_POST
 from django.db.models import Avg, Q
 from django.db import models
 from django.utils.translation import gettext as _
 from django.db.models import Avg
+from datetime import datetime, timedelta
+from django.utils import timezone
 
 from accounts.decorators import admin_required, lecturer_required
 from accounts.models import User, Student
 from .models import (
     NewsAndEvents, TimetableSlot, Batch, Classroom, CourseOffering,
     ActivityLog, Session, Semester, Announcement, Attendance, AttendanceSession, CollegeCalendar,
-    FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH, EIGHTH, StudentFeedback, Feedback
+    FIRST, SECOND, THIRD, FOURTH, FIFTH, SIXTH, SEVENTH, EIGHTH, StudentFeedback, Feedback,
+    StudentTuitionFee, TuitionFee
 )
 from .forms import (
     NewsAndEventsForm, SessionForm, SemesterForm,
     EnhancedAttendanceForm, AttendancePercentageForm, StudentSearchForm,
     AttendanceSessionForm, CollegeCalendarForm, BulkAttendanceForm,
     StudentFeedbackForm, BulkFeedbackForm, FeedbackFilterForm,
-    AttendanceSearchForm, AttendanceCalculationForm, FeedbackForm
+    AttendanceSearchForm, AttendanceCalculationForm, FeedbackForm,
+    StudentTuitionFeeForm, BulkTuitionFeeUpdateForm
 )
 from .utils import (
     generate_timetable_for_day, generate_comprehensive_timetable,
@@ -1234,3 +1239,205 @@ def search_suggestions_api(request):
 def universal_search_demo_view(request):
     """Demo page showing universal search functionality"""
     return render(request, "core/universal_search_demo.html")
+
+# Tuition Fee Views
+@login_required
+def tuition_fee_dashboard(request):
+    """Admin dashboard for tuition fee management"""
+    if not request.user.is_staff:
+        messages.error(request, "Access denied. Staff only.")
+        return redirect('home')
+    
+    # Get statistics
+    total_students = User.objects.filter(is_student=True).count()
+    pending_fees = StudentTuitionFee.objects.filter(is_paid=False).count()
+    overdue_fees = StudentTuitionFee.objects.filter(is_overdue=True).count()
+    paid_fees = StudentTuitionFee.objects.filter(is_paid=True).count()
+    
+    # Get recent fee updates
+    recent_fees = StudentTuitionFee.objects.select_related('student').order_by('-updated_at')[:10]
+    
+    # Get semester fee configuration
+    semester_fees = TuitionFee.objects.all().order_by('semester')
+    
+    context = {
+        'total_students': total_students,
+        'pending_fees': pending_fees,
+        'overdue_fees': overdue_fees,
+        'paid_fees': paid_fees,
+        'recent_fees': recent_fees,
+        'semester_fees': semester_fees,
+    }
+    return render(request, 'core/tuition_fee_dashboard.html', context)
+
+@login_required
+def student_tuition_fees(request, student_id):
+    """View individual student's tuition fees"""
+    student = get_object_or_404(User, id=student_id, is_student=True)
+    
+    # Check if user has permission to view this student's fees
+    if not (request.user.is_staff or request.user == student):
+        messages.error(request, "Access denied.")
+        return redirect('home')
+    
+    # Get or create tuition fee records for all 8 semesters
+    tuition_fees = []
+    for semester in range(1, 9):
+        fee, created = StudentTuitionFee.objects.get_or_create(
+            student=student,
+            semester=semester,
+            defaults={
+                'due_date': timezone.now().date() + timedelta(days=30),
+                'amount_paid': 0.00,
+                'is_paid': False
+            }
+        )
+        tuition_fees.append(fee)
+    
+    # Calculate totals
+    total_paid = sum(fee.amount_paid for fee in tuition_fees)
+    total_due = sum(fee.amount_paid for fee in tuition_fees if not fee.is_paid)
+    
+    context = {
+        'student': student,
+        'tuition_fees': tuition_fees,
+        'total_paid': total_paid,
+        'total_due': total_due,
+    }
+    return render(request, 'core/student_tuition_fees.html', context)
+
+@login_required
+def update_tuition_fee(request, fee_id):
+    """Update individual tuition fee record"""
+    if not request.user.is_staff:
+        messages.error(request, "Access denied. Staff only.")
+        return redirect('home')
+    
+    fee = get_object_or_404(StudentTuitionFee, id=fee_id)
+    
+    if request.method == 'POST':
+        form = StudentTuitionFeeForm(request.POST, instance=fee)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f"Tuition fee for {fee.student.username} - Semester {fee.semester} updated successfully.")
+            return redirect('student_tuition_fees', student_id=fee.student.id)
+    else:
+        form = StudentTuitionFeeForm(instance=fee)
+    
+    context = {
+        'form': form,
+        'fee': fee,
+        'student': fee.student,
+    }
+    return render(request, 'core/update_tuition_fee.html', context)
+
+@login_required
+def bulk_update_tuition_fees(request):
+    """Bulk update tuition fees for all students"""
+    if not request.user.is_staff:
+        messages.error(request, "Access denied. Staff only.")
+        return redirect('home')
+    
+    if request.method == 'POST':
+        form = BulkTuitionFeeUpdateForm(request.POST)
+        if form.is_valid():
+            semester = int(form.cleaned_data['semester'])
+            due_date = form.cleaned_data['due_date']
+            amount = form.cleaned_data['amount']
+            send_notifications = form.cleaned_data['send_notifications']
+            
+            # Update or create semester fee configuration
+            tuition_fee, created = TuitionFee.objects.get_or_create(
+                semester=semester,
+                defaults={'due_date': due_date, 'amount': amount}
+            )
+            if not created:
+                tuition_fee.due_date = due_date
+                tuition_fee.amount = amount
+                tuition_fee.save()
+            
+            # Update all student records for this semester
+            students = User.objects.filter(is_student=True)
+            updated_count = 0
+            
+            for student in students:
+                student_fee, created = StudentTuitionFee.objects.get_or_create(
+                    student=student,
+                    semester=semester,
+                    defaults={'due_date': due_date, 'amount_paid': 0.00, 'is_paid': False}
+                )
+                if not created:
+                    student_fee.due_date = due_date
+                    student_fee.save()
+                updated_count += 1
+            
+            messages.success(request, f"Updated tuition fees for {updated_count} students in Semester {semester}.")
+            
+            # Send email notifications if requested
+            if send_notifications:
+                # This would integrate with your email system
+                messages.info(request, f"Email notifications would be sent to {updated_count} students.")
+            
+            return redirect('tuition_fee_dashboard')
+    else:
+        form = BulkTuitionFeeUpdateForm()
+    
+    context = {
+        'form': form,
+    }
+    return render(request, 'core/bulk_update_tuition_fees.html', context)
+
+@login_required
+def tuition_fee_reports(request):
+    """Generate tuition fee reports"""
+    if not request.user.is_staff:
+        messages.error(request, "Access denied. Staff only.")
+        return redirect('home')
+    
+    # Get filter parameters
+    status_filter = request.GET.get('status', '')
+    semester_filter = request.GET.get('semester', '')
+    
+    # Build queryset
+    fees = StudentTuitionFee.objects.select_related('student').all()
+    
+    if status_filter:
+        if status_filter == 'pending':
+            fees = fees.filter(is_paid=False)
+        elif status_filter == 'overdue':
+            fees = fees.filter(is_overdue=True)
+        elif status_filter == 'paid':
+            fees = fees.filter(is_paid=True)
+    
+    if semester_filter:
+        fees = fees.filter(semester=int(semester_filter))
+    
+    # Export functionality
+    export_format = request.GET.get('export', '')
+    if export_format == 'csv':
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = f'attachment; filename="tuition_fees_{timezone.now().strftime("%Y%m%d")}.csv"'
+        
+        writer = csv.writer(response)
+        writer.writerow(['Student ID', 'Student Name', 'Semester', 'Amount Paid', 'Payment Date', 'Due Date', 'Status', 'Overdue'])
+        
+        for fee in fees:
+            writer.writerow([
+                fee.student.username,
+                f"{fee.student.first_name} {fee.student.last_name}",
+                fee.semester,
+                fee.amount_paid,
+                fee.payment_date or 'N/A',
+                fee.due_date,
+                fee.status,
+                'Yes' if fee.is_overdue else 'No'
+            ])
+        
+        return response
+    
+    context = {
+        'fees': fees,
+        'status_filter': status_filter,
+        'semester_filter': semester_filter,
+    }
+    return render(request, 'core/tuition_fee_reports.html', context)

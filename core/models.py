@@ -3,6 +3,7 @@ from django.db.models import Q
 from django.utils.translation import gettext_lazy as _
 from django.db.models import Avg
 from django.contrib.auth import get_user_model
+from django.utils import timezone
 
 
 NEWS = _("News")
@@ -468,3 +469,72 @@ class Feedback(models.Model):
 
     def __str__(self):
         return f"Feedback from {self.student.username} for {self.lecturer.name}"
+
+
+class TuitionFee(models.Model):
+    """Tuition fee configuration for semesters"""
+    semester = models.IntegerField(choices=[(i, f'Semester {i}') for i in range(1, 9)])
+    due_date = models.DateField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    is_active = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['semester']
+        ordering = ['semester']
+
+    def __str__(self):
+        return f"Semester {self.semester} - Due: {self.due_date}"
+
+class StudentTuitionFee(models.Model):
+    """Individual student tuition fee records"""
+    student = models.ForeignKey('accounts.User', on_delete=models.CASCADE, related_name='tuition_fees')
+    semester = models.IntegerField(choices=[(i, f'Semester {i}') for i in range(1, 9)])
+    amount_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    payment_date = models.DateField(null=True, blank=True)
+    due_date = models.DateField()
+    is_paid = models.BooleanField(default=False)
+    is_overdue = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ['student', 'semester']
+        ordering = ['student', 'semester']
+
+    def __str__(self):
+        return f"{self.student.username} - Semester {self.semester}"
+
+    def save(self, *args, **kwargs):
+        # Check if payment is overdue
+        if not self.is_paid and self.due_date < timezone.now().date():
+            self.is_overdue = True
+        else:
+            self.is_overdue = False
+        
+        # Mark as paid if amount is greater than 0
+        if self.amount_paid > 0:
+            self.is_paid = True
+            if not self.payment_date:
+                self.payment_date = timezone.now().date()
+        
+        super().save(*args, **kwargs)
+
+    @property
+    def status(self):
+        if self.is_paid:
+            return "Paid"
+        elif self.is_overdue:
+            return "Overdue"
+        else:
+            return "Pending"
+
+    @property
+    def status_color(self):
+        if self.is_paid:
+            return "success"
+        elif self.is_overdue:
+            return "danger"
+        else:
+            return "warning"

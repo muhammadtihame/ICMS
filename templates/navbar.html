@@ -63,6 +63,12 @@
 					<a class="dropdown-item" href="{% url 'admin_panel' %}"><i class="fas fa-user-tie me-2"></i>{% trans 'Admin Panel' %}</a>
 					{% endif %}
 
+					{% if request.user.is_staff %}
+					<a class="dropdown-item" href="{% url 'tuition_fee_dashboard' %}"><i class="fas fa-dollar-sign me-2"></i>{% trans 'Tuition Fee Management' %}</a>
+					{% elif request.user.is_student %}
+					<a class="dropdown-item" href="{% url 'student_tuition_fees' request.user.id %}"><i class="fas fa-dollar-sign me-2"></i>{% trans 'My Tuition Fees' %}</a>
+					{% endif %}
+
 					<a class="dropdown-item" href="{% url 'profile' %}"><i class="fas fa-user me-2"></i>{% trans 'Profile' %}</a>
 					<a class="dropdown-item" href="{% url 'edit_profile' %}"><i class="fas fa-cog me-2"></i>{% trans 'Setting' %}</a>
 					<hr>

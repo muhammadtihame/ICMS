@@ -154,3 +154,27 @@ def remove_allocation_on_offering_delete(sender, instance, **kwargs):
         
     except Exception as e:
         print(f"Error removing allocation: {e}")
+
+
+@receiver(post_save, sender=User)
+def create_student_tuition_fees(sender, instance, created, **kwargs):
+    """Automatically create tuition fee records for new students"""
+    if created and instance.is_student:
+        from .models import StudentTuitionFee
+        from django.utils import timezone
+        from datetime import timedelta
+        
+        # Create tuition fee records for all 8 semesters
+        for semester in range(1, 9):
+            # Set default due date to 30 days from now
+            default_due_date = timezone.now().date() + timedelta(days=30)
+            
+            StudentTuitionFee.objects.create(
+                student=instance,
+                semester=semester,
+                amount_paid=0.00,
+                due_date=default_due_date,
+                is_paid=False,
+                is_overdue=False
+            )
+        print(f"Created tuition fee records for new student: {instance.username}")
