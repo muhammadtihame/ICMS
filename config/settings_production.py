@@ -23,16 +23,16 @@ DATABASES = {
 # Honor the 'X-Forwarded-Proto' header for request.is_secure()
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-# Allow all host headers - handle wildcard patterns
+# Allow all host headers - handle specific domains and wildcards
 allowed_hosts = os.environ.get('ALLOWED_HOSTS', '')
 if allowed_hosts:
-    if '*' in allowed_hosts:
-        # If wildcard is specified, allow all hosts
-        ALLOWED_HOSTS = ['*']
-    else:
-        ALLOWED_HOSTS = [host.strip() for host in allowed_hosts.split(',')]
+    # Split by comma and strip whitespace
+    ALLOWED_HOSTS = [host.strip() for host in allowed_hosts.split(',')]
+    # Add wildcard if not already present
+    if '*' not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append('*')
 else:
-    # Default fallback
+    # Default fallback - allow all hosts
     ALLOWED_HOSTS = ['*']
 
 # Static files (CSS, JavaScript, Images)
