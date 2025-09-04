@@ -292,8 +292,8 @@ if DEBUG:
     # Use simple storage for development
     STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 else:
-    # Use WhiteNoise for production - use simple storage to avoid manifest issues
-    STATICFILES_STORAGE = "whitenoise.storage.CompressedStaticFilesStorage"
+    # Use basic Django storage for production to avoid any static files issues
+    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
 STUDENT_ID_PREFIX = config("STUDENT_ID_PREFIX", "ugr")
 LECTURER_ID_PREFIX = config("LECTURER_ID_PREFIX", "lec")
