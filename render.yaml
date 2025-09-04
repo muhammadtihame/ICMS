@@ -9,7 +9,7 @@ services:
       - key: PYTHON_VERSION
         value: 3.9.18
       - key: DJANGO_SECRET_KEY
-        generateValue: true
+        value: "your-secret-key-here-change-this-in-production"
       - key: DEBUG
         value: false
       - key: ALLOWED_HOSTS
