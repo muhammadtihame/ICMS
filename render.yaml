@@ -20,8 +20,3 @@ services:
         value: "/media/"
     healthCheckPath: /
     autoDeploy: true
-
-  - type: pserv
-    name: cms-progress-sql-db
-    env: postgresql
-    plan: starter
