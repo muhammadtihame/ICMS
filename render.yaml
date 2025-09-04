@@ -21,8 +21,6 @@ services:
     healthCheckPath: /
     autoDeploy: true
 
-  - type: pserv
+  - type: pdb
     name: cms-progress-sql-db
-    env: postgresql
     plan: starter
-    ipAllowList: []
