@@ -2,7 +2,7 @@ services:
   - type: web
     name: cms-progress-sql
     runtime: python
-    plan: starter
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: gunicorn config.wsgi:application
     envVars:
