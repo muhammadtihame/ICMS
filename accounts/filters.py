@@ -17,7 +17,7 @@ class LecturerFilter(django_filters.FilterSet):
 
         # Change html classes and placeholders
         self.filters["username"].field.widget.attrs.update(
-            {"class": "au-input", "placeholder": "ID No."}
+            {"class": "au-input", "placeholder": "Username"}
         )
         self.filters["name"].field.widget.attrs.update(
             {"class": "au-input", "placeholder": "Name"}
@@ -33,8 +33,11 @@ class LecturerFilter(django_filters.FilterSet):
 
 
 class StudentFilter(django_filters.FilterSet):
-    id_no = django_filters.CharFilter(
+    username = django_filters.CharFilter(
         field_name="student__username", lookup_expr="exact", label=""
+    )
+    enrollment_number = django_filters.CharFilter(
+        lookup_expr="icontains", label=""
     )
     name = django_filters.CharFilter(
         field_name="student__name", method="filter_by_name", label=""
@@ -49,7 +52,8 @@ class StudentFilter(django_filters.FilterSet):
     class Meta:
         model = Student
         fields = [
-            "id_no",
+            "username",
+            "enrollment_number",
             "name",
             "email",
             "program",
@@ -59,8 +63,11 @@ class StudentFilter(django_filters.FilterSet):
         super().__init__(*args, **kwargs)
 
         # Change html classes and placeholders
-        self.filters["id_no"].field.widget.attrs.update(
-            {"class": "au-input", "placeholder": "ID No."}
+        self.filters["username"].field.widget.attrs.update(
+            {"class": "au-input", "placeholder": "Username"}
+        )
+        self.filters["enrollment_number"].field.widget.attrs.update(
+            {"class": "au-input", "placeholder": "Enrollment Number"}
         )
         self.filters["name"].field.widget.attrs.update(
             {"class": "au-input", "placeholder": "Name"}

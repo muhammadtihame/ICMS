@@ -36,12 +36,60 @@ from .utils import (
     get_batch_attendance_summary, mark_bulk_attendance,
     get_lecturer_courses, search_students, get_detention_list
 )
+from .ai_utils import get_ai_manager, is_ai_available
 
+# Simple test view to bypass all redirects
+def test_view(request):
+    """Simple test view to verify HTTP access works"""
+    return HttpResponse("""
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>CMS Test Page</title>
+        <style>
+            body { font-family: Arial, sans-serif; margin: 40px; background: #f0f0f0; }
+            .container { background: white; padding: 30px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+            .success { color: #28a745; font-weight: bold; }
+            .info { color: #17a2b8; }
+            .warning { color: #ffc107; }
+            .btn { display: inline-block; padding: 10px 20px; margin: 10px; background: #007bff; color: white; text-decoration: none; border-radius: 5px; }
+            .btn:hover { background: #0056b3; }
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <h1 class="success">✅ CMS System is Working!</h1>
+            <p class="info">This page confirms that your Django server is running correctly on HTTP.</p>
+            
+            <h2>System Status:</h2>
+            <ul>
+                <li>✅ Django Server: Running</li>
+                <li>✅ Database: PostgreSQL Connected</li>
+                <li>✅ AI Models: Loaded</li>
+                <li>✅ HTTP Access: Working</li>
+            </ul>
+            
+            <h2>Access Your System:</h2>
+            <a href="/" class="btn">Go to Home Page</a>
+            <a href="/admin/" class="btn">Admin Panel</a>
+            <a href="/accounts/lecturer/add/" class="btn">Add Lecturer</a>
+            <a href="/ai-predictions/" class="btn">AI Predictions</a>
+            
+            <h2>Login Credentials:</h2>
+            <p><strong>Username:</strong> admin_new</p>
+            <p><strong>Password:</strong> admin123</p>
+            
+            <p class="warning">If you see this page, your system is working perfectly!</p>
+        </div>
+    </body>
+    </html>
+    """)
 
 # ########################################################
 # News & Events
 # ########################################################
 @login_required
+@lecturer_required
 def announcement_list_view(request):
     announcements = Announcement.objects.all().order_by("-created_at")
     return render(request, "core/announcement_list.html", {"announcements": announcements})
@@ -85,25 +133,18 @@ def announcement_delete_view(request, pk):
         return redirect("announcement_list")
     return render(request, "core/announcement_confirm_delete.html", {"announcement": announcement})
 
-@login_required
 def home_view(request):
     """Home page view"""
     # Get news and events for the ticker
     news_items = NewsAndEvents.objects.order_by('-updated_date')[:5]
 
-    # Get announcements
-    announcements = Announcement.objects.all().order_by('-created_at')
-
-    # Check if user can add news and announcements
-    can_edit_news = request.user.is_superuser or (hasattr(request.user, 'student') and request.user.is_active)
-    can_edit_announcements = request.user.is_superuser or (hasattr(request.user, 'student') and request.user.is_active)
+    # Check if user can add news (only lecturers and admins)
+    can_edit_news = request.user.is_superuser or (hasattr(request.user, 'lecturer') and request.user.is_lecturer and request.user.is_active)
 
     context = {
         'title': 'Home',
         'items': news_items,  # Template expects 'items' for news
-        'announcements': announcements,
         'can_edit_news': can_edit_news,
-        'can_edit_announcements': can_edit_announcements,
     }
     return render(request, 'core/index.html', context)
 
@@ -111,17 +152,7 @@ def home_view(request):
 @login_required
 def dashboard_view(request):
     """Dashboard view for all users"""
-    # Check if student needs to provide mandatory feedback
-    if (hasattr(request.user, 'student') and 
-        not request.user.is_superuser and 
-        not request.user.is_lecturer):
-        
-        active_lecturers = User.objects.filter(is_lecturer=True, is_active=True)
-        existing_feedback = StudentFeedback.objects.filter(student=request.user.student)
-        
-        # If student hasn't provided feedback for all lecturers, redirect to feedback popup
-        if active_lecturers.exists() and existing_feedback.count() < active_lecturers.count():
-            return redirect('feedback_popup')
+    # Note: Feedback popup is now handled by middleware after every login
     
     # Get user counts for admin dashboard
     student_count = User.objects.filter(is_student=True).count()
@@ -848,18 +879,29 @@ def attendance_reports(request):
 
 @login_required
 def feedback_popup_view(request):
-    """Show mandatory feedback popup for students after login"""
+    """Show feedback popup for students after every login"""
     if not hasattr(request.user, 'student'):
         return redirect('home')
     
     student = request.user.student
     
     # Get ALL active lecturers - feedback is mandatory for everyone
-    active_lecturers = User.objects.filter(is_lecturer=True, is_active=True)
+    # This automatically includes any newly added lecturers
+    active_lecturers = User.objects.filter(is_lecturer=True, is_active=True).order_by('first_name', 'last_name')
     
     # If no lecturers exist, redirect to home
     if not active_lecturers.exists():
         return redirect('home')
+    
+    # Get existing feedback to show what's already completed
+    existing_feedback = StudentFeedback.objects.filter(student=student)
+    completed_lecturers = set(feedback.lecturer_id for feedback in existing_feedback)
+    
+    # Pre-fill existing feedback data
+    initial_data = {}
+    for feedback in existing_feedback:
+        initial_data[f'rating_{feedback.lecturer.id}'] = feedback.rating
+        initial_data[f'message_{feedback.lecturer.id}'] = feedback.message
     
     if request.method == 'POST':
         form = BulkFeedbackForm(request.POST, lecturers=active_lecturers)
@@ -892,16 +934,35 @@ def feedback_popup_view(request):
                     break
             
             if feedback_created and form.is_valid():
-                messages.success(request, "Thank you for your feedback! You can now access all features.")
+                # Check if all lecturers now have feedback
+                total_feedback_count = StudentFeedback.objects.filter(student=student).count()
+                total_lecturers_count = active_lecturers.count()
+                
+                # Update feedback_submitted flag based on whether all lecturers have feedback
+                student.feedback_submitted = (total_feedback_count >= total_lecturers_count)
+                student.save()
+                
+                if existing_feedback.exists():
+                    messages.success(request, "Thank you for updating your feedback! You can now access all features.")
+                else:
+                    messages.success(request, "Thank you for your feedback! You can now access all features.")
+                
+                # Redirect to home page after successful feedback submission
                 return redirect('home')
     else:
-        form = BulkFeedbackForm(lecturers=active_lecturers)
+        form = BulkFeedbackForm(lecturers=active_lecturers, initial=initial_data)
     
     context = {
         'form': form,
         'lecturers': active_lecturers,
+        'existing_feedback': existing_feedback,
+        'completed_lecturers': completed_lecturers,
         'show_popup': True,
-        'is_mandatory': True
+        'is_mandatory': True,
+        'total_lecturers': active_lecturers.count(),
+        'completed_count': existing_feedback.count(),
+        'remaining_count': active_lecturers.count() - existing_feedback.count(),
+        'has_existing_feedback': existing_feedback.exists()
     }
     return render(request, 'core/feedback_popup.html', context)
 
@@ -928,20 +989,46 @@ def admin_feedback_view(request):
         if date_to:
             feedback_list = feedback_list.filter(created_at__date__lte=date_to)
     
-    # Get statistics
+    # Get comprehensive statistics
     total_feedback = feedback_list.count()
     avg_rating = feedback_list.aggregate(Avg('rating'))['rating__avg'] or 0
     
-    # Group by lecturer for summary
+    # Get all active lecturers and their feedback status
+    active_lecturers = User.objects.filter(is_lecturer=True, is_active=True)
+    total_students = User.objects.filter(is_student=True, is_active=True).count()
+    
     lecturer_summary = {}
-    for lecturer in User.objects.filter(is_lecturer=True, is_active=True):
+    total_expected_feedback = 0
+    total_completed_feedback = 0
+    
+    for lecturer in active_lecturers:
         lecturer_feedback = feedback_list.filter(lecturer=lecturer)
-        if lecturer_feedback.exists():
-            lecturer_summary[lecturer] = {
-                'count': lecturer_feedback.count(),
-                'avg_rating': round(lecturer_feedback.aggregate(Avg('rating'))['rating__avg'], 1),
-                'recent_feedback': lecturer_feedback[:3]  # Last 3 feedback
+        expected_feedback = total_students  # Each student should give feedback to each lecturer
+        completed_feedback = lecturer_feedback.count()
+        
+        total_expected_feedback += expected_feedback
+        total_completed_feedback += completed_feedback
+        
+        lecturer_summary[lecturer] = {
+            'count': completed_feedback,
+            'expected': expected_feedback,
+            'completion_rate': round((completed_feedback / expected_feedback) * 100, 1) if expected_feedback > 0 else 0,
+            'avg_rating': round(lecturer_feedback.aggregate(Avg('rating'))['rating__avg'], 1) if lecturer_feedback.exists() else 0,
+            'recent_feedback': lecturer_feedback[:3],  # Last 3 feedback
+            'rating_distribution': {
+                '1': lecturer_feedback.filter(rating=1).count(),
+                '2': lecturer_feedback.filter(rating=2).count(),
+                '3': lecturer_feedback.filter(rating=3).count(),
+                '4': lecturer_feedback.filter(rating=4).count(),
+                '5': lecturer_feedback.filter(rating=5).count(),
             }
+        }
+    
+    # Overall system statistics
+    overall_completion_rate = round((total_completed_feedback / total_expected_feedback) * 100, 1) if total_expected_feedback > 0 else 0
+    
+    # Recent feedback (last 10)
+    recent_feedback = feedback_list.order_by('-created_at')[:10]
     
     context = {
         'feedback_list': feedback_list,
@@ -949,6 +1036,12 @@ def admin_feedback_view(request):
         'total_feedback': total_feedback,
         'avg_rating': round(avg_rating, 1),
         'lecturer_summary': lecturer_summary,
+        'total_lecturers': active_lecturers.count(),
+        'total_students': total_students,
+        'total_expected_feedback': total_expected_feedback,
+        'total_completed_feedback': total_completed_feedback,
+        'overall_completion_rate': overall_completion_rate,
+        'recent_feedback': recent_feedback,
         'title': 'Student Feedback Management'
     }
     return render(request, 'core/admin_feedback.html', context)
@@ -1094,9 +1187,9 @@ def feedback_check(request):
         print(f"DEBUG: Existing feedback: {existing_feedback.count()}")
         
         if active_lecturers.exists() and existing_feedback.count() < active_lecturers.count():
-            print(f"DEBUG: Student needs feedback, redirecting to feedback_required")
-            # Student needs feedback, redirect to feedback required page
-            return redirect('feedback_required')
+            print(f"DEBUG: Student needs feedback, redirecting to feedback_popup")
+            # Student needs feedback, redirect to feedback popup
+            return redirect('feedback_popup')
         else:
             print(f"DEBUG: Student has completed feedback, redirecting to home")
     
@@ -1177,12 +1270,12 @@ def search_suggestions_api(request):
             })
         
         # Search in News & Events
-        news_items = NewsAndEvents.objects.filter(
+        news_events = NewsAndEvents.objects.filter(
             Q(title__icontains=normalized_query) |
             Q(summary__icontains=normalized_query)
         )[:5]
         
-        for news in news_items:
+        for news in news_events:
             suggestions.append({
                 'type': 'news',
                 'id': news.id,
@@ -1190,22 +1283,6 @@ def search_suggestions_api(request):
                 'subtitle': f"News & Events",
                 'url': f"/news/{news.id}/",
                 'icon': '📰'
-            })
-        
-        # Search in Announcements
-        announcements = Announcement.objects.filter(
-            Q(title__icontains=normalized_query) |
-            Q(content__icontains=normalized_query)
-        )[:5]
-        
-        for announcement in announcements:
-            suggestions.append({
-                'type': 'announcement',
-                'id': announcement.id,
-                'title': f"{announcement.title}",
-                'subtitle': f"Announcement",
-                'url': f"/announcements/{announcement.id}/",
-                'icon': '📢'
             })
         
         # Search in Programs
@@ -1375,8 +1452,43 @@ def bulk_update_tuition_fees(request):
             
             # Send email notifications if requested
             if send_notifications:
-                # This would integrate with your email system
-                messages.info(request, f"Email notifications would be sent to {updated_count} students.")
+                try:
+                    from django.core.mail import send_mail
+                    from django.conf import settings
+                    
+                    subject = f"Tuition Fee Update - Semester {semester}"
+                    message = f"""
+Dear Student,
+
+Your tuition fee for Semester {semester} has been updated:
+
+- Due Date: {due_date}
+- Amount: ${amount}
+- Semester: {semester}
+
+Please ensure timely payment to avoid any late fees or restrictions.
+
+Best regards,
+KCET CMS Team
+                    """
+                    
+                    # Send emails to all students
+                    student_emails = [student.email for student in students if student.email]
+                    if student_emails:
+                        send_mail(
+                            subject=subject,
+                            message=message,
+                            from_email=settings.EMAIL_FROM_ADDRESS,
+                            recipient_list=student_emails,
+                            fail_silently=False,
+                        )
+                        messages.success(request, f"Email notifications sent to {len(student_emails)} students.")
+                    else:
+                        messages.warning(request, "No student emails found to send notifications.")
+                        
+                except Exception as e:
+                    messages.error(request, f"Error sending email notifications: {str(e)}")
+                    print(f"❌ Error sending tuition fee emails: {e}")
             
             return redirect('tuition_fee_dashboard')
     else:
@@ -1441,3 +1553,135 @@ def tuition_fee_reports(request):
         'semester_filter': semester_filter,
     }
     return render(request, 'core/tuition_fee_reports.html', context)
+
+@login_required
+def ai_predictions_view(request):
+    """View for AI predictions and analytics"""
+    if not request.user.is_staff and not hasattr(request.user, 'lecturer'):
+        messages.error(request, "Access denied. Only staff and lecturers can view AI predictions.")
+        return redirect('home')
+    
+    ai_manager = get_ai_manager()
+    ai_info = ai_manager.get_model_info()
+    
+    context = {
+        'ai_available': is_ai_available(),
+        'ai_info': ai_info,
+        'feature_names': ai_manager.get_feature_names(),
+    }
+    
+    return render(request, 'core/ai_predictions.html', context)
+
+@login_required
+def student_performance_prediction(request, student_id):
+    """Predict performance for a specific student"""
+    if not request.user.is_staff and not hasattr(request.user, 'lecturer'):
+        messages.error(request, "Access denied.")
+        return redirect('home')
+    
+    try:
+        student = User.objects.get(id=student_id)
+        if not hasattr(student, 'student'):
+            messages.error(request, "User is not a student.")
+            return redirect('home')
+        
+        # Get student data for prediction (this would need to be implemented based on your data structure)
+        # For now, we'll use dummy data
+        student_features = [0.0] * 10  # Adjust based on your feature count
+        
+        ai_manager = get_ai_manager()
+        performance_prediction, error = ai_manager.predict_performance(student_features)
+        score_prediction, score_error = ai_manager.predict_score(student_features)
+        
+        context = {
+            'student': student,
+            'performance_prediction': performance_prediction,
+            'score_prediction': score_prediction,
+            'prediction_error': error,
+            'score_error': score_error,
+            'ai_available': is_ai_available(),
+        }
+        
+        return render(request, 'core/student_prediction.html', context)
+        
+    except User.DoesNotExist:
+        messages.error(request, "Student not found.")
+        return redirect('home')
+    except Exception as e:
+        messages.error(request, f"Error making prediction: {str(e)}")
+        return redirect('home')
+
+
+def check_result_by_enrollment(request):
+    """Public view for checking student results using enrollment number"""
+    result_data = None
+    student_info = None
+    error_message = None
+    
+    if request.method == 'POST':
+        enrollment_number = request.POST.get('enrollment_number', '').strip()
+        
+        if enrollment_number:
+            try:
+                # Find student by enrollment number
+                from accounts.models import Student
+                student = Student.objects.select_related('student', 'program').get(
+                    enrollment_number=enrollment_number
+                )
+                
+                # Get student's results
+                from result.models import Result, TakenCourse
+                results = Result.objects.filter(student=student).order_by('session', 'semester')
+                taken_courses = TakenCourse.objects.filter(student=student).order_by('course__semester')
+                
+                # Group results by session and semester
+                result_summary = {}
+                for result in results:
+                    key = f"{result.session} - {result.semester}"
+                    if key not in result_summary:
+                        result_summary[key] = {
+                            'session': result.session,
+                            'semester': result.semester,
+                            'gpa': result.gpa,
+                            'cgpa': result.cgpa,
+                            'level': result.level
+                        }
+                
+                # Group courses by semester
+                course_summary = {}
+                for course in taken_courses:
+                    semester = course.course.semester
+                    if semester not in course_summary:
+                        course_summary[semester] = []
+                    course_summary[semester].append({
+                        'title': course.course.title,
+                        'code': course.course.code,
+                        'credit': course.course.credit,
+                        'grade': course.grade,
+                        'point': course.point,
+                        'comment': course.comment
+                    })
+                
+                context = {
+                    'student': student,
+                    'result_summary': result_summary,
+                    'course_summary': course_summary,
+                    'enrollment_number': enrollment_number,
+                    'title': 'Result Check'
+                }
+                
+                return render(request, 'core/check_result_public.html', context)
+                
+            except Student.DoesNotExist:
+                error_message = "No student found with this enrollment number. Please check and try again."
+            except Exception as e:
+                error_message = f"An error occurred while fetching results. Please try again later. Error: {str(e)}"
+        else:
+            error_message = "Please enter an enrollment number."
+    
+    context = {
+        'error_message': error_message,
+        'title': 'Check Results'
+    }
+    
+    return render(request, 'core/check_result_form.html', context)

@@ -1,0 +1,150 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{{ title }} | {% trans 'Learning management system' %}{% endblock title %}
+{% load crispy_forms_tags %}
+
+{% block content %}
+
+<nav style="--bs-breadcrumb-divider: '>';" aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li class="breadcrumb-item"><a href="/">{% trans 'Home' %}</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{% trans 'Check Results' %}</li>
+    </ol>
+</nav>
+
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">
+                        <i class="fas fa-search me-2"></i>
+                        {% trans 'Check Your Results' %}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <p class="text-muted">
+                            {% trans 'Enter your enrollment number to view your academic results' %}
+                        </p>
+                    </div>
+
+                    {% if error_message %}
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {{ error_message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endif %}
+
+                    <form method="POST" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="enrollment_number" class="form-label fw-bold">
+                                {% trans 'Enrollment Number' %} <span class="text-danger">*</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                class="form-control form-control-lg" 
+                                id="enrollment_number" 
+                                name="enrollment_number" 
+                                placeholder="e.g., EN2025001"
+                                required
+                                autocomplete="off"
+                            >
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                {% trans 'Enter the enrollment number provided to you during admission' %}
+                            </div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-search me-2"></i>
+                                {% trans 'Check Results' %}
+                            </button>
+                        </div>
+                    </form>
+
+                    <hr class="my-4">
+
+                    <div class="row text-center">
+                        <div class="col-md-4">
+                            <div class="text-primary">
+                                <i class="fas fa-graduation-cap fa-2x mb-2"></i>
+                                <h6>{% trans 'Academic Records' %}</h6>
+                                <small class="text-muted">{% trans 'View your complete academic history' %}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-success">
+                                <i class="fas fa-chart-line fa-2x mb-2"></i>
+                                <h6>{% trans 'Performance Tracking' %}</h6>
+                                <small class="text-muted">{% trans 'Monitor your progress over time' %}</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="text-info">
+                                <i class="fas fa-certificate fa-2x mb-2"></i>
+                                <h6>{% trans 'Grade Reports' %}</h6>
+                                <small class="text-muted">{% trans 'Access detailed grade information' %}</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Help Section -->
+            <div class="card mt-4">
+                <div class="card-header bg-light">
+                    <h6 class="mb-0">
+                        <i class="fas fa-question-circle me-2"></i>
+                        {% trans 'Need Help?' %}
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">{% trans 'Forgot Enrollment Number?' %}</h6>
+                            <p class="small text-muted">
+                                {% trans 'Contact your department office or the student affairs office to retrieve your enrollment number.' %}
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">{% trans 'Results Not Showing?' %}</h6>
+                            <p class="small text-muted">
+                                {% trans 'Results are typically available 2-3 weeks after the end of each semester. Contact your lecturer if you have concerns.' %}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+
+// Auto-focus on enrollment number field
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('enrollment_number').focus();
+});
+</script>
+
+{% endblock content %}

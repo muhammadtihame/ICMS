@@ -1,0 +1,1 @@
+{% extends "base.html" %}{% block title %}AI Predictions{% endblock %}{% block content %}<div class="container"><h2>AI Predictions Dashboard</h2>{% if ai_available %}<p>AI Models: {{ ai_info.models_loaded }}</p>{% else %}<p>AI Models not available</p>{% endif %}</div>{% endblock %}

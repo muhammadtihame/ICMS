@@ -21,6 +21,7 @@ from .views import (
     render_lecturer_pdf_list,  # new
     render_student_pdf_list,  # new
     custom_logout,
+    CustomLoginView,
 )
 
 urlpatterns = [
@@ -53,7 +54,7 @@ urlpatterns = [
         "create_students_pdf_list/", render_student_pdf_list, name="student_list_pdf"
     ),  # new
     # Auth endpoints
-    path("login/", auth_views.LoginView.as_view(template_name='registration/login.html'), name="login"),
+    path("login/", CustomLoginView.as_view(), name="login"),
     path("logout/", auth_views.LogoutView.as_view(next_page="login"), name="logout"),
     # Password reset endpoints (uncommented)
     path('password-reset/', auth_views.PasswordResetView.as_view(template_name='registration/password_reset.html'), name='password_reset'),

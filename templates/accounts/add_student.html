@@ -26,6 +26,7 @@
             <div class="card">
                 <p class="form-title">{% trans 'Personal Info' %}</p>
                 <div class="card-body">
+                    {{ form.username|as_crispy_field }}
                     {{ form.first_name|as_crispy_field }}
                     {{ form.last_name|as_crispy_field }}
                     {{ form.gender|as_crispy_field }}
@@ -39,9 +40,12 @@
             <div class="card">
                 <p class="form-title">{% trans 'Others' %}</p>
                 <div class="card-body">
+                    {{ form.enrollment_number|as_crispy_field }}
                     {{ form.program|as_crispy_field }}
                     {{ form.level|as_crispy_field }}
                     {{ form.semester|as_crispy_field }}
+                    {{ form.password1|as_crispy_field }}
+                    {{ form.password2|as_crispy_field }}
                 </div>
             </div>
         </div>

@@ -7,7 +7,8 @@
   <table class="table">
     <thead>
       <tr>
-        <th>{% trans 'ID No.' %}</th>
+        <th>{% trans 'Username' %}</th>
+        <th>{% trans 'Enrollment Number' %}</th>
         <th>{% trans 'Full Name' %}</th>
         <th>{% trans 'Email' %}</th>
         <th>{% trans 'Mob No.' %}</th>
@@ -19,6 +20,7 @@
       <tr>
         <td> {{ forloop.counter }}.</td>
         <td>{{ student.student.username }}</td>
+        <td>{{ student.enrollment_number|default:"-" }}</td>
         <td><a href="{% url 'profile_single' student.id %}">{{ student.student.get_full_name }}</a></td>
         <td>{{ student.student.email }}</td>
         <td>{{ student.program }}</td>

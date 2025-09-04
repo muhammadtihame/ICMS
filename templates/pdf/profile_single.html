@@ -39,7 +39,7 @@
       <div class="dashboard-description">
         <p><strong>{% trans 'First Name:' %}</strong> {{ user.first_name|title }}</p>
         <p><strong>{% trans 'Last Name:' %}</strong> {{ user.last_name|title }}</p>
-        <p><strong>{% trans 'ID No.:' %}</strong> {{ user.username }}</p>
+                        <p><strong>{% trans 'Username:' %}</strong> {{ user.username }}</p>
       </div>
 
       {% if user.is_student %}

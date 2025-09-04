@@ -142,7 +142,15 @@ class StudentManager(models.Manager):
     def search(self, query=None):
         qs = self.get_queryset()
         if query is not None:
-            or_lookup = Q(level__icontains=query) | Q(program__icontains=query)
+            or_lookup = (
+                Q(level__icontains=query) | 
+                Q(program__icontains=query) |
+                Q(enrollment_number__icontains=query) |
+                Q(student__username__icontains=query) |
+                Q(student__first_name__icontains=query) |
+                Q(student__last_name__icontains=query) |
+                Q(student__email__icontains=query)
+            )
             qs = qs.filter(
                 or_lookup
             ).distinct()  # distinct() is often necessary with Q lookups
@@ -152,9 +160,11 @@ class StudentManager(models.Manager):
 class Student(models.Model):
     student = models.OneToOneField(User, on_delete=models.CASCADE)
     # id_number = models.CharField(max_length=20, unique=True, blank=True)
+    enrollment_number = models.CharField(max_length=20, unique=True, blank=True, null=True, help_text="Unique enrollment number for result checking")
     level = models.CharField(max_length=25, choices=LEVEL, null=True)
     program = models.ForeignKey(Program, on_delete=models.CASCADE, null=True)
     semester = models.CharField(max_length=10, choices=settings.SEMESTER_CHOICES, null=True, blank=True, help_text="Current semester of enrollment")
+    feedback_submitted = models.BooleanField(default=False, help_text="Whether the student has submitted mandatory feedback")
 
     objects = StudentManager()
 

@@ -3,6 +3,12 @@ from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from course.models import Course, CourseAllocation, Program
 from core.models import Session, CourseOffering, Batch, StudentEnrollment
+from django.contrib.auth.signals import user_logged_in
+from django.dispatch import receiver
+from django.shortcuts import redirect
+from django.urls import reverse
+from django.contrib import messages
+from django.http import HttpResponseRedirect
 
 User = get_user_model()
 

@@ -143,13 +143,20 @@
                 <div class="dashboard-description">
                     <p><strong>{% trans 'First Name' %}:</strong> {{ user.first_name|title }}</p>
                     <p><strong>{% trans 'Last Name' %}:</strong> {{ user.last_name|title }}</p>
-                    <p><strong>{% trans 'ID No.' %}:</strong> {{ user.username }}</p>
+                                            <p><strong>{% trans 'Username' %}:</strong> {{ user.username }}</p>
                 </div>
                 {% if user.is_student %}
                 <hr>
                 <p class="fw-bold"><i class="me-2 fas fa-graduation-cap"></i> {% trans 'Applicant Info' %}</p>
                 <div class="dashboard-description">
                     <p><strong>{% trans 'School' %}: </strong>Unity College</p>
+                    <p><strong>{% trans 'Enrollment Number' %}: </strong>
+                        {% if student.enrollment_number %}
+                            <span class="badge bg-success">{{ student.enrollment_number }}</span>
+                        {% else %}
+                            <span class="text-muted">Not assigned</span>
+                        {% endif %}
+                    </p>
                     <p><strong>{% trans 'Level' %}: </strong>{{ level.level }}</p>
                     <p><strong>{% trans 'Program' %}: </strong>{{ student.program }}</p>
                 </div>

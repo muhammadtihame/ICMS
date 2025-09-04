@@ -14,28 +14,61 @@ import os
 from decouple import config
 from django.utils.translation import gettext_lazy as _
 
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+# Build paths inside the project like this: os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = config(
-    "SECRET_KEY", default="o!ld8nrt4vc*h1zoey*wj48x*q0#ss12h=+zh)kk^6b3aygg=!"
-)
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "ud76-@_%zlkiummv_8qv&7^r+q$1=p11aao9fjq(^_hp5f)%p(")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config("DEBUG", default=True, cast=bool)
 
-ALLOWED_HOSTS = ["127.0.0.1", "adilmohak1.pythonanywhere.com"]
+# =============================================================================
+# DEVELOPMENT SECURITY SETTINGS (Flexible HTTP/HTTPS)
+# =============================================================================
+# These settings allow both HTTP and HTTPS access in development mode
+
+# Allow both HTTP and HTTPS (don't force either)
+SECURE_SSL_REDIRECT = False
+SECURE_REDIRECT_EXEMPT = ['*']
+SECURE_PROXY_SSL_HEADER = None
+SECURE_SSL_HOST = None
+
+# HSTS settings - Allow HTTPS but don't force it
+SECURE_HSTS_SECONDS = 0
+SECURE_HSTS_INCLUDE_SUBDOMAINS = False
+SECURE_HSTS_PRELOAD = False
+
+# Security headers - Allow both protocols
+SECURE_CONTENT_TYPE_NOSNIFF = False
+SECURE_BROWSER_XSS_FILTER = False
+SECURE_FRAME_DENY = False
+SECURE_REFERRER_POLICY = None
+
+# Cookie Security - Allow both HTTP and HTTPS
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_HTTPONLY = False
+CSRF_COOKIE_HTTPONLY = False
+
+# Frame options - Allow both
+X_FRAME_OPTIONS = None
+
+# Allow both protocols
+USE_HTTPS = False
+FORCE_HTTPS = False
+
+ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,localhost", cast=lambda v: [s.strip() for s in v.split(',')])
 
 # change the default user models to our custom model
 AUTH_USER_MODEL = "accounts.User"
 
 # Authentication settings
 LOGIN_URL = "login"
-LOGIN_REDIRECT_URL = "home"  # Middleware will handle feedback requirements
+# LOGIN_REDIRECT_URL = "home"  # Custom login view now handles redirects
 LOGOUT_REDIRECT_URL = "login"
 
 # Application definition
@@ -74,16 +107,16 @@ PROJECT_APPS = [
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + PROJECT_APPS
 
 MIDDLEWARE = [
-    "django.middleware.security.SecurityMiddleware",
+    # "django.middleware.security.SecurityMiddleware",  # Temporarily disabled for development
+    "core.middleware.ForceHTTPMiddleware",  # Force HTTP access
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.locale.LocaleMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
-    "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "django.middleware.locale.LocaleMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # whitenoise to serve static files
-    "core.middleware.FeedbackRequiredMiddleware",  # New feedback middleware
+    # "django.middleware.clickjacking.XFrameOptionsMiddleware",  # Disabled for development
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -120,8 +153,12 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": os.path.join(BASE_DIR, "db.sqlite3"),
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": config("DATABASE_NAME", default="kcet_cms"),
+        "USER": config("DATABASE_USER", default="kcet_user"),
+        "PASSWORD": config("DATABASE_PASSWORD", default="Cse#1000"),
+        "HOST": config("DATABASE_HOST", default="localhost"),
+        "PORT": config("DATABASE_PORT", default="5432"),
     }
 }
 
@@ -204,15 +241,16 @@ MEDIA_ROOT = os.path.join(BASE_DIR, "media")
 # -----------------------------------
 # E-mail configuration
 
+# Email configuration
 EMAIL_BACKEND = config(
     "EMAIL_BACKEND", default="django.core.mail.backends.smtp.EmailBackend"
 )
 EMAIL_HOST = config("EMAIL_HOST", default="smtp.gmail.com")
 EMAIL_PORT = config("EMAIL_PORT", default=587)
 EMAIL_USE_TLS = config("EMAIL_USE_TLS", default=True, cast=bool)
-EMAIL_HOST_USER = config("EMAIL_HOST_USER")
-EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD")
-EMAIL_FROM_ADDRESS = config("EMAIL_FROM_ADDRESS")
+EMAIL_HOST_USER = config("EMAIL_HOST_USER", default="")
+EMAIL_HOST_PASSWORD = config("EMAIL_HOST_PASSWORD", default="")
+EMAIL_FROM_ADDRESS = config("EMAIL_FROM_ADDRESS", default="noreply@kcet.edu")
 EMAIL_USE_SSL = False
 
 # crispy config
@@ -222,8 +260,8 @@ CRISPY_TEMPLATE_PACK = "bootstrap5"
 LOGIN_REDIRECT_URL = "home"
 
 # Strip payment config
-STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="")
-STRIPE_PUBLISHABLE_KEY = config("STRIPE_PUBLISHABLE_KEY", default="")
+STRIPE_SECRET_KEY = config("STRIPE_SECRET_KEY", default="sk_test_placeholder")
+STRIPE_PUBLISHABLE_KEY = config("STRIPE_PUBLISHABLE_KEY", default="pk_test_placeholder")
 
 # LOGGING
 # ------------------------------------------------------------------------------
@@ -249,8 +287,13 @@ LOGGING = {
     "root": {"level": "INFO", "handlers": ["console"]},
 }
 
-# WhiteNoise configuration
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+# Static files configuration
+if DEBUG:
+    # Use simple storage for development
+    STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
+else:
+    # Use WhiteNoise for production
+    STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 STUDENT_ID_PREFIX = config("STUDENT_ID_PREFIX", "ugr")
 LECTURER_ID_PREFIX = config("LECTURER_ID_PREFIX", "lec")
@@ -297,10 +340,10 @@ SEMESTER_CHOICES = (
 DEFAULT_FROM_EMAIL = EMAIL_FROM_ADDRESS
 
 # =============================================================================
-# PRODUCTION SECURITY SETTINGS
+# PRODUCTION SECURITY SETTINGS (HTTPS only)
 # =============================================================================
-
-# Only apply these settings when not in debug mode (production)
+# WARNING: These settings ONLY apply when DEBUG=False (production mode)
+# In development mode (DEBUG=True), the development settings above take precedence
 if not DEBUG:
     # Security Settings
     SECURE_SSL_REDIRECT = True

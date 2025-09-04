@@ -27,7 +27,7 @@ class StaffAddForm(UserCreationForm):
             }
         ),
         label="Username",
-        required=False,
+        required=True,  # Changed from False to True
     )
 
     first_name = forms.CharField(
@@ -130,9 +130,62 @@ class StaffAddForm(UserCreationForm):
         user.phone = self.cleaned_data.get("phone")
         user.address = self.cleaned_data.get("address")
         user.email = self.cleaned_data.get("email")
+        
+        # Ensure username is not empty
+        if not user.username or user.username.strip() == "":
+            # Generate username from first and last name
+            first_name = user.first_name.strip().lower()
+            last_name = user.last_name.strip().lower()
+            base_username = f"{first_name}.{last_name}"
+            
+            # Make sure username is unique
+            counter = 1
+            username = base_username
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+            
+            user.username = username
 
         if commit:
             user.save()
+            
+            # Send welcome email to the new lecturer
+            try:
+                from django.core.mail import send_mail
+                from django.conf import settings
+                
+                subject = f"Welcome to KCET CMS - {user.get_full_name}"
+                message = f"""
+Dear {user.get_full_name},
+
+Welcome to KCET College Management System!
+
+Your lecturer account has been created successfully with the following details:
+- Username: {user.username}
+- Password: {self.cleaned_data.get('password1')}
+- Email: {user.email}
+- Role: Lecturer
+
+You can now log in to your lecturer portal using your username and password above.
+
+Best regards,
+KCET CMS Team
+                """
+                
+                # Send email
+                send_mail(
+                    subject=subject,
+                    message=message,
+                    from_email=settings.EMAIL_FROM_ADDRESS,
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+                
+                print(f"✅ Welcome email sent to lecturer {user.email}")
+                
+            except Exception as e:
+                print(f"⚠️ Error sending welcome email to lecturer {user.email}: {e}")
             
             # Automatically assign courses to the new lecturer
             try:
@@ -213,7 +266,7 @@ class StudentAddForm(UserCreationForm):
             attrs={"type": "text", "class": "form-control", "id": "username_id"}
         ),
         label="Username",
-        required=False,
+        required=True,  # Changed from False to True
     )
     address = forms.CharField(
         max_length=30,
@@ -234,7 +287,7 @@ class StudentAddForm(UserCreationForm):
                 "class": "form-control",
             }
         ),
-        label="Mobile No.",
+        label="Phone",
     )
 
     first_name = forms.CharField(
@@ -296,6 +349,20 @@ class StudentAddForm(UserCreationForm):
         help_text="Select the semester the student is enrolling in",
     )
 
+    enrollment_number = forms.CharField(
+        max_length=20,
+        widget=forms.TextInput(
+            attrs={
+                "type": "text",
+                "class": "form-control",
+                "placeholder": "e.g., EN2025001"
+            }
+        ),
+        label="Enrollment Number",
+        help_text="Unique enrollment number for result checking",
+        required=True,
+    )
+
     email = forms.EmailField(
         widget=forms.TextInput(
             attrs={
@@ -347,8 +414,23 @@ class StudentAddForm(UserCreationForm):
         user.gender = self.cleaned_data.get("gender")
         user.address = self.cleaned_data.get("address")
         user.phone = self.cleaned_data.get("phone")
-        user.address = self.cleaned_data.get("address")
         user.email = self.cleaned_data.get("email")
+        
+        # Ensure username is not empty
+        if not user.username or user.username.strip() == "":
+            # Generate username from first and last name
+            first_name = user.first_name.strip().lower()
+            last_name = user.last_name.strip().lower()
+            base_username = f"{first_name}.{last_name}"
+            
+            # Make sure username is unique
+            counter = 1
+            username = base_username
+            while User.objects.filter(username=username).exists():
+                username = f"{base_username}{counter}"
+                counter += 1
+            
+            user.username = username
 
         if commit:
             user.save()
@@ -357,7 +439,46 @@ class StudentAddForm(UserCreationForm):
                 level=self.cleaned_data.get("level"),
                 program=self.cleaned_data.get("program"),
                 semester=self.cleaned_data.get("semester"),
+                enrollment_number=self.cleaned_data.get("enrollment_number"),
             )
+            
+            # Send welcome email to the new student
+            try:
+                from django.core.mail import send_mail
+                from django.conf import settings
+                
+                subject = f"Welcome to KCET CMS - {user.get_full_name}"
+                message = f"""
+Dear {user.get_full_name},
+
+Welcome to KCET College Management System!
+
+Your account has been created successfully with the following details:
+- Username: {user.username}
+- Password: {self.cleaned_data.get('password1')}
+- Email: {user.email}
+- Program: {self.cleaned_data.get('program')}
+- Semester: {self.cleaned_data.get('semester')}
+
+You can now log in to your student portal using your username and password above.
+
+Best regards,
+KCET CMS Team
+                """
+                
+                # Send email
+                send_mail(
+                    subject=subject,
+                    message=message,
+                    from_email=settings.EMAIL_FROM_ADDRESS,
+                    recipient_list=[user.email],
+                    fail_silently=False,
+                )
+                
+                print(f"✅ Welcome email sent to {user.email}")
+                
+            except Exception as e:
+                print(f"⚠️ Error sending welcome email to {user.email}: {e}")
 
         return user
 

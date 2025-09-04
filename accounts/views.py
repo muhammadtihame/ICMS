@@ -18,6 +18,12 @@ from django.http import JsonResponse
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 from django.db.models import Avg
+from django.contrib.auth import authenticate, login
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.views import LoginView
+from django.urls import reverse
 
 from accounts.decorators import admin_required, lecturer_required
 from accounts.filters import LecturerFilter, StudentFilter
@@ -573,3 +579,65 @@ def custom_logout(request):
     
     logout(request)
     return redirect('login')
+
+
+class CustomLoginView(LoginView):
+    """Custom login view that redirects students to feedback popup if needed"""
+    template_name = 'registration/login.html'
+    
+    def get_success_url(self):
+        """Default redirect to home"""
+        return reverse('home')
+    
+    def form_valid(self, form):
+        """Override to handle feedback redirect after successful login"""
+        # First, authenticate the user
+        response = super().form_valid(form)
+        
+        # Now check if this user needs to provide feedback
+        user = form.get_user()
+        print(f"DEBUG LOGIN: User {user.username} logged in successfully")
+        
+        if hasattr(user, 'student') and not user.is_superuser and not user.is_lecturer:
+            print(f"DEBUG LOGIN: User identified as student")
+            
+            try:
+                from core.models import StudentFeedback
+                from accounts.models import User
+                
+                # Check if student has submitted mandatory feedback for ALL active lecturers
+                total_lecturers = User.objects.filter(is_lecturer=True, is_active=True).count()
+                print(f"DEBUG LOGIN: Total active lecturers: {total_lecturers}")
+                
+                if total_lecturers > 0:
+                    existing_feedback = StudentFeedback.objects.filter(student=user.student)
+                    feedback_complete = existing_feedback.count() >= total_lecturers
+                    print(f"DEBUG LOGIN: Existing feedback count: {existing_feedback.count()}")
+                    print(f"DEBUG LOGIN: Feedback complete: {feedback_complete}")
+                    
+                    # Update the feedback_submitted flag to match current state
+                    if user.student.feedback_submitted != feedback_complete:
+                        user.student.feedback_submitted = feedback_complete
+                        user.student.save()
+                        print(f"DEBUG LOGIN: Updated feedback_submitted to: {feedback_complete}")
+                    
+                    if not feedback_complete:
+                        # Student needs feedback, redirect to feedback popup
+                        print(f"DEBUG LOGIN: Redirecting student to feedback_popup")
+                        messages.info(self.request, "Welcome! Please provide feedback for your lecturers before continuing.")
+                        
+                        # Return a redirect response instead of the default response
+                        from django.shortcuts import redirect
+                        return redirect('feedback_popup')
+                    else:
+                        print(f"DEBUG LOGIN: Student has complete feedback, redirecting to home")
+                else:
+                    print(f"DEBUG LOGIN: No active lecturers, redirecting to home")
+                    
+            except Exception as e:
+                print(f"DEBUG LOGIN: Error in feedback check: {e}")
+        else:
+            print(f"DEBUG LOGIN: User is not a student, redirecting to home")
+        
+        # Default behavior - redirect to home
+        return response

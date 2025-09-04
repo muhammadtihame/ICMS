@@ -3,29 +3,41 @@
 	<div class="container">
 		<div class="nav-wrapper align-items-center">
 
-			<div class="flex-grow-1 text-center d-none d-md-block">
+			<div class="flex-grow-1 text-center">
 				<h1 class="site-title h5 m-0 text-white text-uppercase">
 					KASHMIR COLLEGE OF ENGINEERING AND TECHNOLOGY
 				</h1>
-				{% if ticker_items %}
 				<div class="announcement-ticker mt-1">
-					<div class="ticker-container">
-						<div class="ticker-content">
-							{% for item in ticker_items %}
-								<a href="{% url 'home' %}" class="ticker-item" title="Click to view News & Events">
-									<i class="fas fa-bullhorn me-1"></i>
-									{{ item.title }}
-								</a>
-							{% endfor %}
+					<div class="d-flex align-items-center w-100">
+						<div class="ticker-container flex-grow-1">
+							{% if ticker_items %}
+							<div class="ticker-content">
+								{% for item in ticker_items %}
+									<a href="{% url 'home' %}" class="ticker-item" title="Click to view News & Events">
+										<i class="fas fa-bullhorn me-1"></i>
+										{{ item.title }}
+									</a>
+								{% endfor %}
+							</div>
+							{% else %}
+							<div class="ticker-content">
+								<div class="ticker-item" style="color: #ffffff; background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2);">
+									<i class="fas fa-info-circle me-1"></i>
+									No announcements yet. Be the first to add one!
+								</div>
+							</div>
+							{% endif %}
 						</div>
+						
+						{% if can_add_news %}
+						<div class="ms-3">
+							<a class="btn btn-sm btn-light" href="{% url 'add_item' %}" style="background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%); border: 2px solid #0b4b8c; color: #0b4b8c; font-weight: 600; box-shadow: 0 2px 6px rgba(11, 75, 140, 0.2); white-space: nowrap;">
+								<i class="fas fa-plus me-1"></i> Add Announcement
+							</a>
+						</div>
+						{% endif %}
 					</div>
-					{% if can_add_news %}
-						<a class="btn btn-sm btn-light ms-2" href="{% url 'add_item' %}">
-							<i class="fas fa-plus me-1"></i> Add new post
-						</a>
-					{% endif %}
 				</div>
-				{% endif %}
 			</div>
 
 			<div class="toggle-btn" onclick="toggleSidebar()">
@@ -42,10 +54,10 @@
 			</form>
 
 			<div class="dropdown">
-				<div class="avatar border border-2" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+				<div class="avatar border border-2" type="button" data-bs-toggle="dropdown" aria-expanded="false" data-bs-auto-close="true">
 					<img src="{{ request.user.picture.url }}">
 				</div>
-				<div class="dropdown-menu" style="min-width: 14rem !important;">
+				<div class="dropdown-menu dropdown-menu-end" data-bs-popper="static" style="min-width: 14rem !important; z-index: 10000 !important;">
 					<div class="d-flex flex-column align-items-center">
 						<div class="avatar avatar-md border">
 							<img src="{{ request.user.picture.url }}">
@@ -82,3 +94,163 @@
 		</div>
 	</div>
 </div>
+
+<style>
+/* Ensure dropdown appears above all other elements */
+.dropdown-menu {
+    z-index: 10000 !important;
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    left: auto !important;
+    transform: none !important;
+    margin-top: 5px !important;
+}
+
+/* Override Bootstrap's positioning */
+.dropdown-menu.show {
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    left: auto !important;
+    transform: none !important;
+    margin-top: 5px !important;
+}
+
+/* Ensure proper stacking context */
+#top-navbar .dropdown {
+    position: relative;
+    z-index: 10001;
+}
+
+/* Force override for all dropdown states */
+#top-navbar .dropdown .dropdown-menu,
+#top-navbar .dropdown .dropdown-menu.show,
+#top-navbar .dropdown .dropdown-menu[data-bs-popper] {
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    left: auto !important;
+    transform: none !important;
+    margin-top: 5px !important;
+    z-index: 10000 !important;
+}
+
+/* Additional specificity to override any conflicting styles */
+#top-navbar .nav-wrapper .dropdown .dropdown-menu {
+    position: absolute !important;
+    top: 100% !important;
+    right: 0 !important;
+    left: auto !important;
+    transform: none !important;
+    margin-top: 5px !important;
+    z-index: 10000 !important;
+}
+
+/* Debug styles - remove after testing */
+.dropdown-menu {
+    border: 2px solid red !important;
+    background: white !important;
+}
+</style>
+
+<script>
+// Ensure navbar dropdown appears above all other elements
+document.addEventListener('DOMContentLoaded', function() {
+    const profileDropdown = document.querySelector('#top-navbar .dropdown');
+    const dropdownMenu = profileDropdown.querySelector('.dropdown-menu');
+    
+    // Set high z-index and proper positioning
+    dropdownMenu.style.zIndex = '10000';
+    dropdownMenu.style.position = 'absolute';
+    dropdownMenu.style.top = '100%';
+    dropdownMenu.style.right = '0';
+    dropdownMenu.style.left = 'auto';
+    dropdownMenu.style.transform = 'none';
+    dropdownMenu.style.marginTop = '5px';
+    
+    // Override Bootstrap's dropdown positioning
+    profileDropdown.addEventListener('show.bs.dropdown', function() {
+        console.log('Dropdown showing - setting position');
+        dropdownMenu.style.position = 'absolute';
+        dropdownMenu.style.top = '100%';
+        dropdownMenu.style.right = '0';
+        dropdownMenu.style.left = 'auto';
+        dropdownMenu.style.transform = 'none';
+        dropdownMenu.style.marginTop = '5px';
+        dropdownMenu.style.zIndex = '10000';
+        dropdownMenu.style.bottom = 'auto';
+        dropdownMenu.style.marginBottom = '0';
+    });
+    
+    // Also handle the dropdown after it's shown
+    profileDropdown.addEventListener('shown.bs.dropdown', function() {
+        console.log('Dropdown shown - ensuring position');
+        dropdownMenu.style.position = 'absolute';
+        dropdownMenu.style.top = '100%';
+        dropdownMenu.style.right = '0';
+        dropdownMenu.style.left = 'auto';
+        dropdownMenu.style.transform = 'none';
+        dropdownMenu.style.marginTop = '5px';
+        dropdownMenu.style.zIndex = '10000';
+        dropdownMenu.style.bottom = 'auto';
+        dropdownMenu.style.marginBottom = '0';
+    });
+    
+    // Force positioning on any dropdown state change
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                if (dropdownMenu.classList.contains('show')) {
+                    console.log('Dropdown class changed - fixing position');
+                    dropdownMenu.style.position = 'absolute';
+                    dropdownMenu.style.top = '100%';
+                    dropdownMenu.style.right = '0';
+                    dropdownMenu.style.left = 'auto';
+                    dropdownMenu.style.transform = 'none';
+                    dropdownMenu.style.marginTop = '5px';
+                    dropdownMenu.style.zIndex = '10000';
+                    dropdownMenu.style.bottom = 'auto';
+                    dropdownMenu.style.marginBottom = '0';
+                }
+            }
+        });
+    });
+    
+    observer.observe(dropdownMenu, { attributes: true });
+    
+    // Additional positioning fix for Bootstrap 5
+    profileDropdown.addEventListener('click', function(e) {
+        if (e.target.closest('.avatar')) {
+            console.log('Avatar clicked - setting timeout for position fix');
+            setTimeout(() => {
+                dropdownMenu.style.position = 'absolute';
+                dropdownMenu.style.top = '100%';
+                dropdownMenu.style.right = '0';
+                dropdownMenu.style.left = 'auto';
+                dropdownMenu.style.transform = 'none';
+                dropdownMenu.style.marginTop = '5px';
+                dropdownMenu.style.zIndex = '10000';
+                dropdownMenu.style.bottom = 'auto';
+                dropdownMenu.style.marginBottom = '0';
+            }, 10);
+        }
+    });
+    
+    // Additional event listener for any dropdown state changes
+    document.addEventListener('click', function(e) {
+        if (dropdownMenu.classList.contains('show')) {
+            console.log('Global click - ensuring dropdown position');
+            dropdownMenu.style.position = 'absolute';
+            dropdownMenu.style.top = '100%';
+            dropdownMenu.style.right = '0';
+            dropdownMenu.style.left = 'auto';
+            dropdownMenu.style.transform = 'none';
+            dropdownMenu.style.marginTop = '5px';
+            dropdownMenu.style.zIndex = '10000';
+            dropdownMenu.style.bottom = 'auto';
+            dropdownMenu.style.marginBottom = '0';
+        }
+    });
+});
+</script>

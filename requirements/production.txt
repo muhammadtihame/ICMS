@@ -1,10 +1,11 @@
-# PRECAUTION: avoid production dependencies that aren't in development
-
 -r base.txt
 
-gunicorn==20.1.0  # https://github.com/benoitc/gunicorn
+# Production server
+gunicorn==21.2.0
+whitenoise==6.2.0
 
-# Django
-# ------------------------------------------------------------------------------
-django-storages[boto3]==1.13.1  # https://github.com/jschneier/django-storages
-django-anymail[amazon_ses]==9.0  # https://github.com/anymail/django-anymail
+# Database
+psycopg2-binary==2.9.9
+
+# Environment variables
+python-decouple==3.8

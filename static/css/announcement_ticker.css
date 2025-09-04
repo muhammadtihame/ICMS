@@ -17,11 +17,11 @@
     padding: 0 16px !important;
     border-radius: 0 !important;
     /* Remove rounded corners for flush alignment */
-    border-top: 1px solid rgba(11, 75, 140, 0.2) !important;
-    border-bottom: 1px solid rgba(11, 75, 140, 0.2) !important;
+    border-top: 2px solid #0b4b8c !important;
+    border-bottom: 2px solid #0b4b8c !important;
     z-index: 1100 !important;
-    background: linear-gradient(90deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.9) 100%) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+    background: linear-gradient(90deg, #0b4b8c 0%, #1e6fd9 50%, #0b4b8c 100%) !important;
+    box-shadow: 0 4px 12px rgba(11, 75, 140, 0.3) !important;
     visibility: visible !important;
     opacity: 1 !important;
     box-sizing: border-box !important;
@@ -58,33 +58,33 @@
 .ticker-item {
     display: inline-flex !important;
     align-items: center !important;
-    padding: 6px 16px !important;
+    padding: 8px 18px !important;
     margin-right: 40px !important;
-    color: #0b4b8c !important;
-    font-weight: 500 !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
     font-size: 0.95rem !important;
-    text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8) !important;
-    background: rgba(255, 255, 255, 0.8) !important;
-    border-radius: 6px !important;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1) !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+    background: linear-gradient(135deg, #1e6fd9 0%, #0b4b8c 100%) !important;
+    border-radius: 8px !important;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2) !important;
     transition: all 0.3s ease !important;
-    border: 1px solid rgba(11, 75, 140, 0.15) !important;
+    border: 2px solid rgba(255, 255, 255, 0.2) !important;
     cursor: pointer !important;
     text-decoration: none !important;
     white-space: nowrap !important;
 }
 
 .ticker-item:hover {
-    background: rgba(255, 255, 255, 0.95) !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15) !important;
-    border-color: rgba(11, 75, 140, 0.3) !important;
-    color: #0b4b8c !important;
+    background: linear-gradient(135deg, #0b4b8c 0%, #1e6fd9 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3) !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
+    color: #ffffff !important;
     text-decoration: none !important;
 }
 
 .ticker-item i {
-    color: #007bff !important;
+    color: #ffffff !important;
     margin-right: 8px !important;
     font-size: 1rem !important;
     flex-shrink: 0 !important;
@@ -130,14 +130,55 @@
 
 /* Minimal fix for dropdown overlap */
 .dropdown-menu {
-    z-index: 1400 !important;
-    /* Ensure dropdown appears above ticker */
+    z-index: 10000 !important;
+    /* Ensure dropdown appears below trigger */
     position: absolute !important;
     top: 100% !important;
+    bottom: auto !important;
     right: 0 !important;
     margin-top: 5px !important;
     min-width: 200px !important;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Ensure main content doesn't overlap with ticker */
+#main-content {
+    margin-top: 60px !important;
+    /* Account for ticker height */
+}
+
+/* Ensure sidebar doesn't overlap with ticker */
+#side-nav {
+    z-index: 1200 !important;
+    /* Above ticker but below dropdowns */
+}
+
+/* Style for the Add Announcement button */
+.announcement-ticker .btn-light {
+    background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%) !important;
+    border: 2px solid #0b4b8c !important;
+    color: #0b4b8c !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 6px rgba(11, 75, 140, 0.2) !important;
+    transition: all 0.3s ease !important;
+    text-decoration: none !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+}
+
+.announcement-ticker .btn-light:hover {
+    background: linear-gradient(135deg, #0b4b8c 0%, #1e6fd9 100%) !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(11, 75, 140, 0.4) !important;
+    border-color: #0b4b8c !important;
+    color: white !important;
+    text-decoration: none !important;
+}
+
+/* Ensure the ticker container takes up remaining space */
+.announcement-ticker .ticker-container {
+    flex: 1 !important;
+    min-width: 0 !important;
 }
 
 /* Ensure ticker is visible in all contexts */
@@ -163,7 +204,7 @@
 
 @media (max-width: 768px) {
     .announcement-ticker {
-        padding: 10px 12px !important;
+        padding: 8px 10px !important;
         /* Reduced padding */
         height: 45px !important;
         /* Slightly smaller height */
@@ -176,8 +217,8 @@
     }
 
     .ticker-item {
-        padding: 5px 12px !important;
-        /* Reduced padding */
+        padding: 6px 14px !important;
+        /* Reduced padding but maintain blue theme */
         margin-right: 30px !important;
         /* Reduced margin */
         font-size: 0.9rem !important;
@@ -192,7 +233,7 @@
 
 @media (max-width: 576px) {
     .announcement-ticker {
-        padding: 8px 10px !important;
+        padding: 6px 8px !important;
         /* Further reduced padding */
         height: 40px !important;
         /* Smaller height */
@@ -205,8 +246,8 @@
     }
 
     .ticker-item {
-        padding: 4px 10px !important;
-        /* Further reduced padding */
+        padding: 5px 12px !important;
+        /* Further reduced padding but maintain blue theme */
         margin-right: 25px !important;
         /* Further reduced margin */
         font-size: 0.85rem !important;

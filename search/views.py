@@ -1,7 +1,7 @@
 from itertools import chain
 from django.views.generic import ListView
 from django.contrib.auth import get_user_model
-from core.models import NewsAndEvents, Announcement, Semester, Session, Batch
+from core.models import NewsAndEvents, Semester, Session, Batch
 from course.models import Program, Course
 from quiz.models import Quiz
 
@@ -26,9 +26,6 @@ class SearchView(ListView):
         if query is not None:
             # Core content
             news_events_results = NewsAndEvents.objects.search(query)
-            announcement_results = Announcement.objects.filter(
-                title__icontains=query
-            ) | Announcement.objects.filter(content__icontains=query)
             
             # Course content
             program_results = Program.objects.search(query)
@@ -56,7 +53,6 @@ class SearchView(ListView):
             # combine querysets
             queryset_chain = chain(
                 news_events_results,
-                announcement_results,
                 program_results,
                 course_results,
                 quiz_results,

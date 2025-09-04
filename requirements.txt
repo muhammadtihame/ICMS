@@ -1,3 +1,4 @@
--r requirements/local.txt
+-r requirements/production.txt
 gunicorn 
 whitenoise
+dj-database-url==2.1.0

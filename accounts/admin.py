@@ -38,8 +38,9 @@ class StudentAdmin(admin.ModelAdmin):
         "semester",
         "get_full_name",
         "get_email",
+        "feedback_submitted",
     ]
-    list_filter = ["program", "level", "semester"]
+    list_filter = ["program", "level", "semester", "feedback_submitted"]
     search_fields = ["student__username", "student__first_name", "student__last_name", "student__email"]
     ordering = ["student__first_name", "student__last_name"]
     
