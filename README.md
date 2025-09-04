@@ -1,6 +1,6 @@
 # KCET: Kashmir College of Engineering & Technology Management System
 
-The world's most high-end designed, lightweight, and feature-rich learning management system.
+The world's most high-end designed, lightweight, and feature-rich Intelligent College management system.
 
 A comprehensive and proprietary college management system for Kashmir College of Engineering & Technology (KCET).
 
@@ -88,4 +88,4 @@ This software is proprietary. No permission is granted to copy, use, modify, or 
 
 ✨ **Developed by Mohammad Tihame for Kashmir College of Engineering & Technology (KCET)**
 
-*For support and inquiries, contact the development team directly.*
+*For support and inquiries, contact the development team directly.*# ICMS
