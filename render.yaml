@@ -7,17 +7,17 @@ services:
     startCommand: gunicorn config.wsgi:application
     envVars:
       - key: PYTHON_VERSION
-        value: 3.9.18
+        value: "3.9.18"
       - key: DJANGO_SECRET_KEY
         value: "your-secret-key-here-change-this-in-production"
       - key: DEBUG
-        value: false
+        value: "false"
       - key: ALLOWED_HOSTS
-        value: cms-progress-sql.onrender.com
+        value: "cms-progress-sql.onrender.com"
       - key: STATIC_URL
-        value: /static/
+        value: "/static/"
       - key: MEDIA_URL
-        value: /media/
+        value: "/media/"
     healthCheckPath: /
     autoDeploy: true
 
@@ -26,6 +26,3 @@ services:
     env: postgresql
     plan: starter
     ipAllowList: []
-    maxConnections: 10
-    maintenanceWindow: sun-00:00
-    terminationProtection: false
