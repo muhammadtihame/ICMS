@@ -13,7 +13,7 @@ services:
       - key: DEBUG
         value: "false"
       - key: ALLOWED_HOSTS
-        value: "cms-progress-sql.onrender.com"
+        value: "*.onrender.com"
       - key: STATIC_URL
         value: "/static/"
       - key: MEDIA_URL
