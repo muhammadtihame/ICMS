@@ -25,8 +25,9 @@ services:
     healthCheckPath: /
     autoDeploy: true
 
-  - type: pdb
+  - type: pserv
     name: cms-progress-sql-db
+    env: postgresql
     plan: starter
     ipAllowList: []
     maxConnections: 10
