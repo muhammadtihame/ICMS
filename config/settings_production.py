@@ -53,8 +53,8 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = os.environ.get('MEDIA_URL', '/media/')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
-# Use the most basic static files storage to avoid any issues
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+# Use WhiteNoise for static files serving in production
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
 
 # Security settings for production
 SECURE_SSL_REDIRECT = True

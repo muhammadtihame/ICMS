@@ -20,7 +20,7 @@ This guide will walk you through deploying your Django CMS system manually on Re
 ### Basic Settings:
 - **Name**: `cms-progress-sql`
 - **Runtime**: `Python 3`
-- **Build Command**: `pip install -r requirements.txt`
+- **Build Command**: `./build.sh` (this will run migrations and collect static files automatically)
 - **Start Command**: `gunicorn config.wsgi:application`
 
 ### Environment Variables:
