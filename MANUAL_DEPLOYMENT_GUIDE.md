@@ -58,6 +58,11 @@ MEDIA_URL=/media/
    - **Key**: `DATABASE_URL`
    - **Value**: Paste the External Database URL from step 2
 
+**Example DATABASE_URL format:**
+```
+postgresql://icms_db_user:EBIbi2fkTLfAScgLqXSRiSm3LetM03Bv@dpg-d2thm715pdvs739j9vs0-a/icms_db
+```
+
 ## Step 5: Deploy
 
 1. Click "Create Web Service"
@@ -90,13 +95,15 @@ If you need admin access:
 ### Common Issues:
 
 1. **Build Failures**: Check the build logs in Render dashboard
-2. **Database Connection**: 
+2. **Database Connection**:
    - Ensure `DATABASE_URL` is set correctly
    - Check that the PostgreSQL service is running
    - Verify the database URL format: `postgresql://user:password@host:port/database`
+   - **Important**: Make sure you're using the External Database URL, not the Internal one
 3. **Static Files**: Should work automatically with our configuration
 4. **Environment Variables**: Double-check all required variables are set
 5. **Database Engine Error**: If you see "settings.DATABASES is improperly configured", the `DATABASE_URL` is missing or incorrect
+6. **Localhost Connection Error**: If you see "connection to localhost:5432 failed", it means Django is not using the `DATABASE_URL` - check that the environment variable is set correctly
 
 ### Logs:
 - Check build logs for deployment issues
