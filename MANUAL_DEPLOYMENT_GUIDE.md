@@ -51,10 +51,12 @@ MEDIA_URL=/media/
 
 ## Step 4: Connect Database to Web Service
 
-1. Go to your web service settings
-2. Add environment variable:
+1. Go to your PostgreSQL service dashboard
+2. Copy the "External Database URL" (it looks like: `postgresql://user:password@host:port/database`)
+3. Go to your web service settings
+4. Add environment variable:
    - **Key**: `DATABASE_URL`
-   - **Value**: Copy the "External Database URL" from your PostgreSQL service
+   - **Value**: Paste the External Database URL from step 2
 
 ## Step 5: Deploy
 
@@ -88,9 +90,13 @@ If you need admin access:
 ### Common Issues:
 
 1. **Build Failures**: Check the build logs in Render dashboard
-2. **Database Connection**: Ensure `DATABASE_URL` is set correctly
+2. **Database Connection**: 
+   - Ensure `DATABASE_URL` is set correctly
+   - Check that the PostgreSQL service is running
+   - Verify the database URL format: `postgresql://user:password@host:port/database`
 3. **Static Files**: Should work automatically with our configuration
 4. **Environment Variables**: Double-check all required variables are set
+5. **Database Engine Error**: If you see "settings.DATABASES is improperly configured", the `DATABASE_URL` is missing or incorrect
 
 ### Logs:
 - Check build logs for deployment issues
