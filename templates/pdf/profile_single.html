@@ -7,7 +7,7 @@
     <table>
         <tr>
             <td>
-                <img src="{{ user.picture.path }}" class="user-picture">
+                <img src="{{ user.get_picture }}" class="user-picture">
             </td>
             <td class="info">
                 <p>{{ user.get_full_name|title }}</p>

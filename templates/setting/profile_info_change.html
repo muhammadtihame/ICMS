@@ -17,7 +17,7 @@
 
 {% include 'snippets/messages.html' %}
 
-<form action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
+<form id="profile-form" action="" method="POST" enctype="multipart/form-data">{% csrf_token %}
     <div class="row mb-4">
         <div class="col-md-6">
             <div class="card">
@@ -34,13 +34,156 @@
         </div>
         <div class="col-md-6">
             <div class="card">
-                <p class="form-title">{% trans 'Others' %}</p>
+                <p class="form-title">{% trans 'Profile Picture' %}</p>
                 <div class="card-body">
+                    <div class="text-center mb-3">
+                        <img id="current-picture" src="{{ user.get_picture }}" alt="Current Profile Picture" 
+                             class="img-thumbnail" style="max-width: 200px; max-height: 200px;">
+                        <p class="small text-muted mt-2">{% trans 'Current Picture' %}</p>
+                    </div>
                     {{ form.picture|as_crispy_field }}
+                    <div class="text-center mt-3">
+                        <img id="preview-picture" src="#" alt="Preview" 
+                             class="img-thumbnail" style="max-width: 200px; max-height: 200px; display: none;">
+                        <p id="preview-text" class="small text-muted mt-2" style="display: none;">{% trans 'New Picture Preview' %}</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     <button class="btn btn-primary" type="submit">{% trans 'Update Profile' %}</button>
 </form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const pictureInput = document.getElementById('id_picture');
+    const currentPicture = document.getElementById('current-picture');
+    const previewPicture = document.getElementById('preview-picture');
+    const previewText = document.getElementById('preview-text');
+    const profileForm = document.getElementById('profile-form');
+    
+    // Picture preview functionality
+    if (pictureInput) {
+        pictureInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                if (!file.type.startsWith('image/')) {
+                    alert('{% trans "Please select a valid image file." %}');
+                    this.value = '';
+                    return;
+                }
+                
+                // Validate file size (max 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('{% trans "File size must be less than 5MB." %}');
+                    this.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewPicture.src = e.target.result;
+                    previewPicture.style.display = 'block';
+                    previewText.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                previewPicture.style.display = 'none';
+                previewText.style.display = 'none';
+            }
+        });
+    }
+    
+    // AJAX form submission for immediate updates (only if picture is being uploaded)
+    if (profileForm) {
+        profileForm.addEventListener('submit', function(e) {
+            const formData = new FormData(this);
+            const hasPicture = formData.get('picture') && formData.get('picture').size > 0;
+            
+            // Only use AJAX if a picture is being uploaded
+            if (hasPicture) {
+                e.preventDefault();
+                
+                const submitButton = this.querySelector('button[type="submit"]');
+                const originalText = submitButton.textContent;
+                
+                // Show loading state
+                submitButton.textContent = '{% trans "Updating..." %}';
+                submitButton.disabled = true;
+                
+                fetch(this.action || window.location.href, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                    }
+                })
+                .then(response => {
+                    if (response.ok) {
+                        return response.json();
+                    } else {
+                        throw new Error('Network response was not ok');
+                    }
+                })
+                .then(data => {
+                    if (data.success) {
+                        // Update current picture immediately
+                        currentPicture.src = data.picture_url;
+                        
+                        // Hide preview and show success message
+                        previewPicture.style.display = 'none';
+                        previewText.style.display = 'none';
+                        
+                        // Show success message
+                        showMessage('success', data.message);
+                        
+                        // Clear the file input
+                        pictureInput.value = '';
+                    } else {
+                        showMessage('error', data.message || '{% trans "An error occurred while updating your profile." %}');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    // Fallback to normal form submission
+                    showMessage('info', '{% trans "Switching to normal form submission..." %}');
+                    setTimeout(() => {
+                        this.submit();
+                    }, 1000);
+                })
+                .finally(() => {
+                    // Reset button state
+                    submitButton.textContent = originalText;
+                    submitButton.disabled = false;
+                });
+            }
+            // If no picture is being uploaded, let the form submit normally
+        });
+    }
+    
+    function showMessage(type, message) {
+        // Create message element
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show`;
+        messageDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        `;
+        
+        // Insert at the top of the content
+        const content = document.querySelector('.container-fluid, .container, main');
+        if (content) {
+            content.insertBefore(messageDiv, content.firstChild);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (messageDiv.parentNode) {
+                    messageDiv.remove();
+                }
+            }, 5000);
+        }
+    }
+});
+</script>
 {% endblock content %}

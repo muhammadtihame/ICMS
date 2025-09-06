@@ -113,24 +113,29 @@ class User(AbstractUser):
 
     def get_picture(self):
         try:
-            return self.picture.url
+            if self.picture and hasattr(self.picture, 'url'):
+                return self.picture.url
+            else:
+                return settings.MEDIA_URL + "default.png"
         except:
-            no_picture = settings.MEDIA_URL + "default.png"
-            return no_picture
+            return settings.MEDIA_URL + "default.png"
 
     def get_absolute_url(self):
         return reverse("profile_single", kwargs={"user_id": self.id})
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
-        try:
-            img = Image.open(self.picture.path)
-            if img.height > 300 or img.width > 300:
-                output_size = (300, 300)
-                img.thumbnail(output_size)
-                img.save(self.picture.path)
-        except:
-            pass
+        # Only process image if picture exists and is not default
+        if self.picture and self.picture.name and self.picture.name != 'default.png':
+            try:
+                img = Image.open(self.picture.path)
+                if img.height > 300 or img.width > 300:
+                    output_size = (300, 300)
+                    img.thumbnail(output_size)
+                    img.save(self.picture.path)
+            except Exception as e:
+                print(f"Error processing image: {e}")
+                pass
 
     def delete(self, *args, **kwargs):
         if self.picture.url != settings.MEDIA_URL + "default.png":
@@ -222,3 +227,47 @@ class DepartmentHead(models.Model):
 
     def __str__(self):
         return "{}".format(self.user)
+
+
+class UserSession(models.Model):
+    """
+    Track active user sessions for single-session enforcement.
+    Only one active session per user is allowed.
+    """
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='active_sessions')
+    session_key = models.CharField(max_length=40, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_activity = models.DateTimeField(auto_now=True)
+    ip_address = models.GenericIPAddressField(null=True, blank=True)
+    user_agent = models.TextField(null=True, blank=True)
+
+    class Meta:
+        ordering = ("-last_activity",)
+
+    def __str__(self):
+        return f"{self.user.username} - {self.session_key[:8]}..."
+
+    @classmethod
+    def create_session(cls, user, session_key, request=None):
+        """Create a new session and invalidate all previous sessions for this user."""
+        # Delete all existing sessions for this user
+        cls.objects.filter(user=user).delete()
+        
+        # Create new session
+        session = cls.objects.create(
+            user=user,
+            session_key=session_key,
+            ip_address=request.META.get('REMOTE_ADDR') if request else None,
+            user_agent=request.META.get('HTTP_USER_AGENT') if request else None
+        )
+        return session
+
+    @classmethod
+    def is_valid_session(cls, user, session_key):
+        """Check if the session is valid for the user."""
+        return cls.objects.filter(user=user, session_key=session_key).exists()
+
+    @classmethod
+    def invalidate_user_sessions(cls, user):
+        """Invalidate all sessions for a specific user."""
+        cls.objects.filter(user=user).delete()

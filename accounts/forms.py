@@ -543,6 +543,7 @@ class ProfileUpdateForm(UserChangeForm):
         label="Address / city",
     )
 
+
     class Meta:
         model = User
         fields = [
@@ -554,6 +555,17 @@ class ProfileUpdateForm(UserChangeForm):
             "address",
             "picture",
         ]
+    
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Customize the picture field widget
+        self.fields['picture'].widget.attrs.update({
+            'class': 'form-control',
+            'accept': 'image/*',
+            'id': 'id_picture',
+        })
+        self.fields['picture'].label = 'Profile Picture'
+        self.fields['picture'].required = False
 
 
 class ProgramUpdateForm(UserChangeForm):

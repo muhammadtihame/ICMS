@@ -35,7 +35,7 @@ from accounts.forms import (
     StudentAddForm,
     StudentEditForm,
 )
-from accounts.models import Parent, Student, User
+from accounts.models import Parent, Student, User, UserSession
 from core.models import Semester, Session
 from course.models import Course
 from result.models import TakenCourse
@@ -227,11 +227,41 @@ def admin_panel(request):
 def profile_update(request):
     if request.method == "POST":
         form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user)
+        
+        # Debug: Print form data
+        print(f"Form is valid: {form.is_valid()}")
+        print(f"Form errors: {form.errors}")
+        print(f"Files in request: {list(request.FILES.keys())}")
+        if 'picture' in request.FILES:
+            print(f"Picture file: {request.FILES['picture']}")
+        
         if form.is_valid():
-            form.save()
+            # Save the form (Django will handle file upload automatically)
+            user = form.save()
+            print(f"User saved. New picture: {user.picture}")
+            print(f"Picture name: {user.picture.name if user.picture else 'None'}")
             messages.success(request, "Your profile has been updated successfully.")
+            
+            # Handle AJAX requests
+            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Profile updated successfully',
+                    'picture_url': user.get_picture()
+                })
+            
             return redirect("profile")
-        messages.error(request, "Please correct the error(s) below.")
+        else:
+            print(f"Form validation failed: {form.errors}")
+            messages.error(request, "Please correct the error(s) below.")
+        
+        # Handle AJAX requests with errors
+        if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+            return JsonResponse({
+                'success': False,
+                'message': 'Please correct the error(s) below.',
+                'errors': form.errors
+            })
     else:
         form = ProfileUpdateForm(instance=request.user)
     return render(request, "setting/profile_info_change.html", {"form": form})
@@ -573,9 +603,14 @@ class ParentAdd(CreateView):
 
 
 def custom_logout(request):
-    """Custom logout view that redirects to login page"""
+    """Custom logout view that redirects to login page and cleans up session tracking"""
     from django.contrib.auth import logout
     from django.shortcuts import redirect
+    
+    # Clean up session tracking before logout
+    if request.user.is_authenticated:
+        UserSession.invalidate_user_sessions(request.user)
+        print(f"DEBUG LOGOUT: Invalidated sessions for user {request.user.username}")
     
     logout(request)
     return redirect('login')
@@ -590,13 +625,21 @@ class CustomLoginView(LoginView):
         return reverse('home')
     
     def form_valid(self, form):
-        """Override to handle feedback redirect after successful login"""
+        """Override to handle feedback redirect after successful login and session management"""
         # First, authenticate the user
         response = super().form_valid(form)
         
-        # Now check if this user needs to provide feedback
+        # Get the authenticated user
         user = form.get_user()
         print(f"DEBUG LOGIN: User {user.username} logged in successfully")
+        
+        # Create/update session tracking for single-session enforcement
+        session_key = self.request.session.session_key
+        if session_key:
+            UserSession.create_session(user, session_key, self.request)
+            print(f"DEBUG SESSION: Created session tracking for user {user.username}")
+        
+        # Now check if this user needs to provide feedback
         
         if hasattr(user, 'student') and not user.is_superuser and not user.is_lecturer:
             print(f"DEBUG LOGIN: User identified as student")
