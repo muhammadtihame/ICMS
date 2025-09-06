@@ -11,9 +11,9 @@
 					<div class="d-flex align-items-center w-100">
 						<div class="ticker-container flex-grow-1">
 							{% if ticker_items %}
-							<div class="ticker-content">
+							<div class="ticker-content" id="announcement-ticker">
 								{% for item in ticker_items %}
-									<a href="{% url 'home' %}" class="ticker-item" title="Click to view News & Events">
+									<a href="{% url 'home' %}" class="ticker-item" title="Click to view News & Events" style="display: none;">
 										<i class="fas fa-bullhorn me-1"></i>
 										{{ item.title }}
 									</a>
