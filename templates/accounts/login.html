@@ -1,5 +1,6 @@
 {% extends 'registration/registration_base.html' %}
 {% load i18n %}
+{% load static %}
 {% block title %}{% trans 'Dj Learning Management System - Login' %}{% endblock title %}
 {% load crispy_forms_tags %}
 {% block content %}
@@ -7,9 +8,7 @@
 <!-- Branding Header -->
 <div class="text-center mb-4">
   <div class="branding-header" style="background: linear-gradient(135deg, #0b4b8c 0%, #1e6fd9 100%); color: white; padding: 2rem; border-radius: 15px; box-shadow: 0 8px 25px rgba(11, 75, 140, 0.3); margin-bottom: 2rem;">
-    <h1 class="display-6 fw-bold mb-2" style="color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-      WELCOME TO INTELLIGENT SYSTEM
-    </h1>
+    <img src="{% static 'img/brand.png' %}" alt="College Logo" class="college-logo" style="max-width: 180px; height: auto; margin-bottom: 10px;">
     <h2 class="h4 fw-light" style="color: rgba(255,255,255,0.9); text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
       KASHMIR COLLEGE of ENGINEERING & TECHNOLOGY
     </h2>
