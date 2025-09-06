@@ -49,14 +49,28 @@ else:
 STATIC_URL = os.environ.get('STATIC_URL', '/static/')
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
-# Media files
-MEDIA_URL = os.environ.get('MEDIA_URL', '/media/')
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# Media files - Use Google Cloud Storage in production
+USE_GCS = os.environ.get('USE_GCS', 'True').lower() == 'true'
 
-# Configure media file serving for production
-# Note: In production, you should use a CDN or cloud storage for media files
-# For now, we'll serve them directly (not recommended for high traffic)
-MEDIAFILES_STORAGE = 'django.core.files.storage.FileSystemStorage'
+if USE_GCS:
+    # Google Cloud Storage settings
+    GS_BUCKET_NAME = os.environ.get('GS_BUCKET_NAME', '')
+    GOOGLE_CLOUD_PROJECT = os.environ.get('GOOGLE_CLOUD_PROJECT', '')
+    GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS', '')
+    
+    # Use Google Cloud Storage for media files
+    DEFAULT_FILE_STORAGE = 'storages.backends.gcloud.GoogleCloudStorage'
+    GS_DEFAULT_ACL = 'publicRead'
+    GS_FILE_OVERWRITE = False
+    
+    # Media URL for GCS
+    MEDIA_URL = f'https://storage.googleapis.com/{GS_BUCKET_NAME}/'
+    MEDIA_ROOT = ''  # Not used with GCS
+else:
+    # Fallback to local storage (not recommended for production)
+    MEDIA_URL = os.environ.get('MEDIA_URL', '/media/')
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+    DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 
 # Use WhiteNoise for static files serving in production
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'

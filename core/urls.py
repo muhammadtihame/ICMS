@@ -137,8 +137,8 @@ urlpatterns = [
     path('check-result/', check_result_by_enrollment, name='check_result_by_enrollment'),
 ]
 
-# Add media file serving for production
-if not settings.DEBUG:
+# Add media file serving for production (only if not using GCS)
+if not settings.DEBUG and not getattr(settings, 'USE_GCS', False):
     from .media_views import serve_media
     urlpatterns += [
         path('media/<path:path>', serve_media, name='serve_media'),
