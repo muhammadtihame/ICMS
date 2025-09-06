@@ -13,7 +13,7 @@
 							{% if ticker_items %}
 							<div class="ticker-content" id="announcement-ticker">
 								{% for item in ticker_items %}
-									<a href="{% url 'home' %}" class="ticker-item" title="Click to view News & Events" style="display: none;">
+									<a href="{% url 'home' %}" class="ticker-item" title="Click to view News & Events">
 										<i class="fas fa-bullhorn me-1"></i>
 										{{ item.title }}
 									</a>
