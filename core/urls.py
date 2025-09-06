@@ -31,6 +31,7 @@ from .views import (
     ai_predictions_view,
     student_performance_prediction,
     test_view,
+    health_check,
     # Post management views
     post_add,
     edit_post,
@@ -55,6 +56,9 @@ from .views import (
 )
 
 urlpatterns = [
+    # Health check endpoint for Render
+    path('health/', health_check, name='health_check'),
+    
     # Test view to bypass all redirects
     path('test/', test_view, name='test_view'),
     

@@ -1,0 +1,12 @@
+# Django College Management System - Render Deployment Requirements
+
+# Core Django requirements
+-r requirements/production.txt
+
+# Additional requirements for Render
+gunicorn==21.2.0
+whitenoise==6.2.0
+dj-database-url==2.1.0
+
+# Remove Firebase-specific dependencies for Render deployment
+# google-cloud-storage==2.10.0  # Commented out for Render

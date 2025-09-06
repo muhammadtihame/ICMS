@@ -1,8 +1,10 @@
 from django.shortcuts import redirect
 from django.urls import reverse
 from django.http import HttpResponse
+from django.contrib.auth import logout
+from django.contrib.sessions.models import Session
 from .models import StudentFeedback
-from accounts.models import User
+from accounts.models import User, UserSession
 
 
 class ForceHTTPMiddleware:
@@ -84,5 +86,44 @@ class FeedbackRequiredMiddleware:
                         print(f"DEBUG MIDDLEWARE: Student {request.user.username} has completed feedback ({existing_feedback_count}/{total_lecturers}), allowing access to {request.path}")
                 else:
                     print(f"DEBUG MIDDLEWARE: No lecturers in system, allowing student access")
+
+        return self.get_response(request)
+
+
+class SessionValidationMiddleware:
+    """
+    Middleware to enforce single-session policy and validate session integrity.
+    Ensures only one active session per user and sessions expire when browser closes.
+    """
+    
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Skip session validation for unauthenticated users
+        if request.user.is_authenticated:
+            session_key = request.session.session_key
+            
+            # Check if this session is valid for the user
+            if not UserSession.is_valid_session(request.user, session_key):
+                # Session is invalid, logout the user
+                print(f"DEBUG SESSION: Invalid session for user {request.user.username}, logging out")
+                logout(request)
+                # Redirect to login with a message
+                from django.contrib import messages
+                messages.warning(request, "Your session has expired or you've logged in from another device. Please log in again.")
+                return redirect('login')
+            
+            # Update last activity for valid sessions
+            try:
+                user_session = UserSession.objects.get(user=request.user, session_key=session_key)
+                user_session.save()  # This will update last_activity due to auto_now=True
+            except UserSession.DoesNotExist:
+                # Session record doesn't exist, logout user
+                print(f"DEBUG SESSION: Session record not found for user {request.user.username}, logging out")
+                logout(request)
+                from django.contrib import messages
+                messages.warning(request, "Your session has expired. Please log in again.")
+                return redirect('login')
 
         return self.get_response(request)

@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import JsonResponse, HttpResponse
+from django.views.decorators.csrf import csrf_exempt
 import csv
 from django.views.decorators.http import require_POST
 from django.db.models import Avg, Q
@@ -1685,3 +1686,14 @@ def check_result_by_enrollment(request):
     }
     
     return render(request, 'core/check_result_form.html', context)
+
+
+@csrf_exempt
+def health_check(request):
+    """Health check endpoint for Render deployment"""
+    return JsonResponse({
+        'status': 'healthy',
+        'service': 'College Management System',
+        'timestamp': timezone.now().isoformat(),
+        'version': '1.0.0'
+    })
