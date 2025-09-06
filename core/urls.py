@@ -1,4 +1,5 @@
 from django.urls import path
+from django.conf import settings
 from .views import (
     home_view,
     announcement_list_view,
@@ -135,3 +136,10 @@ urlpatterns = [
     # Public Result Checking
     path('check-result/', check_result_by_enrollment, name='check_result_by_enrollment'),
 ]
+
+# Add media file serving for production
+if not settings.DEBUG:
+    from .media_views import serve_media
+    urlpatterns += [
+        path('media/<path:path>', serve_media, name='serve_media'),
+    ]

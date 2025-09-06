@@ -24,6 +24,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import LoginView
 from django.urls import reverse
+from django.conf import settings
 
 from accounts.decorators import admin_required, lecturer_required
 from accounts.filters import LecturerFilter, StudentFilter
@@ -228,31 +229,51 @@ def profile_update(request):
     if request.method == "POST":
         form = ProfileUpdateForm(request.POST, request.FILES, instance=request.user)
         
-        # Debug: Print form data
-        print(f"Form is valid: {form.is_valid()}")
-        print(f"Form errors: {form.errors}")
-        print(f"Files in request: {list(request.FILES.keys())}")
-        if 'picture' in request.FILES:
-            print(f"Picture file: {request.FILES['picture']}")
+        # Debug: Print form data (only in development)
+        if settings.DEBUG:
+            print(f"Form is valid: {form.is_valid()}")
+            print(f"Form errors: {form.errors}")
+            print(f"Files in request: {list(request.FILES.keys())}")
+            if 'picture' in request.FILES:
+                print(f"Picture file: {request.FILES['picture']}")
         
         if form.is_valid():
-            # Save the form (Django will handle file upload automatically)
-            user = form.save()
-            print(f"User saved. New picture: {user.picture}")
-            print(f"Picture name: {user.picture.name if user.picture else 'None'}")
-            messages.success(request, "Your profile has been updated successfully.")
-            
-            # Handle AJAX requests
-            if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
-                return JsonResponse({
-                    'success': True,
-                    'message': 'Profile updated successfully',
-                    'picture_url': user.get_picture()
-                })
-            
-            return redirect("profile")
+            try:
+                # Save the form (Django will handle file upload automatically)
+                user = form.save()
+                
+                if settings.DEBUG:
+                    print(f"User saved. New picture: {user.picture}")
+                    print(f"Picture name: {user.picture.name if user.picture else 'None'}")
+                
+                messages.success(request, "Your profile has been updated successfully.")
+                
+                # Handle AJAX requests
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': True,
+                        'message': 'Profile updated successfully',
+                        'picture_url': user.get_picture()
+                    })
+                
+                return redirect("profile")
+            except Exception as e:
+                error_msg = f"An error occurred while updating your profile: {str(e)}"
+                messages.error(request, error_msg)
+                
+                if settings.DEBUG:
+                    print(f"Error saving profile: {e}")
+                
+                # Handle AJAX requests with errors
+                if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+                    return JsonResponse({
+                        'success': False,
+                        'message': error_msg,
+                        'errors': {'general': [error_msg]}
+                    })
         else:
-            print(f"Form validation failed: {form.errors}")
+            if settings.DEBUG:
+                print(f"Form validation failed: {form.errors}")
             messages.error(request, "Please correct the error(s) below.")
         
         # Handle AJAX requests with errors

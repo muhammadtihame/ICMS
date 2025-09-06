@@ -113,11 +113,21 @@ class User(AbstractUser):
 
     def get_picture(self):
         try:
-            if self.picture and hasattr(self.picture, 'url'):
-                return self.picture.url
+            if self.picture and hasattr(self.picture, 'url') and self.picture.name:
+                # In production, ensure the URL is properly formatted
+                if settings.DEBUG:
+                    return self.picture.url
+                else:
+                    # In production, use the media URL directly
+                    return f"{settings.MEDIA_URL}{self.picture.name}"
             else:
                 return settings.MEDIA_URL + "default.png"
-        except:
+        except Exception as e:
+            # Log the error in production
+            if not settings.DEBUG:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.error(f"Error getting picture URL for user {self.id}: {e}")
             return settings.MEDIA_URL + "default.png"
 
     def get_absolute_url(self):

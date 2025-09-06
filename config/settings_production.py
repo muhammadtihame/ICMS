@@ -53,8 +53,27 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = os.environ.get('MEDIA_URL', '/media/')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Configure media file serving for production
+# Note: In production, you should use a CDN or cloud storage for media files
+# For now, we'll serve them directly (not recommended for high traffic)
+MEDIAFILES_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
 # Use WhiteNoise for static files serving in production
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedStaticFilesStorage'
+
+# Add WhiteNoise middleware for media files (temporary solution)
+# In production, consider using AWS S3, Cloudinary, or similar for media files
+MIDDLEWARE = [
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'core.middleware.SessionValidationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
 
 # Security settings for production
 SECURE_SSL_REDIRECT = True
