@@ -91,6 +91,7 @@ THIRD_PARTY_APPS = [
     "crispy_forms",
     "crispy_bootstrap5",
     "django_filters",
+    "storages",
 ]
 
 # Custom apps
@@ -236,6 +237,26 @@ STATICFILES_FINDERS = [
 # Media files config
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+
+# Google Cloud Storage configuration
+USE_GCS = config("USE_GCS", default=False, cast=bool)
+
+if USE_GCS:
+    # Google Cloud Storage settings
+    GS_BUCKET_NAME = config("GS_BUCKET_NAME", default="")
+    GOOGLE_CLOUD_PROJECT = config("GOOGLE_CLOUD_PROJECT", default="")
+    GOOGLE_APPLICATION_CREDENTIALS = config("GOOGLE_APPLICATION_CREDENTIALS", default="")
+    
+    # Use Google Cloud Storage for media files
+    DEFAULT_FILE_STORAGE = "storages.backends.gcloud.GoogleCloudStorage"
+    GS_DEFAULT_ACL = "publicRead"
+    GS_FILE_OVERWRITE = False
+    
+    # Media URL for GCS
+    MEDIA_URL = f"https://storage.googleapis.com/{GS_BUCKET_NAME}/"
+else:
+    # Use local storage for development
+    DEFAULT_FILE_STORAGE = "django.core.files.storage.FileSystemStorage"
 
 # -----------------------------------
 # E-mail configuration

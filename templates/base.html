@@ -10,7 +10,11 @@
 
     <title>{% block title %}KCET College Management System{% endblock title %}</title>
 
-    	<link rel="shortcut icon" href="{% static 'img/favicon.png' %}" type="image/x-icon">
+    <!-- Favicon and Apple Touch Icons -->
+    <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
+    <link rel="shortcut icon" href="{% static 'img/favicon.png' %}" type="image/x-icon">
+    <link rel="apple-touch-icon" href="{% static 'img/apple-touch-icon.png' %}">
+    <link rel="apple-touch-icon-precomposed" href="{% static 'img/apple-touch-icon-precomposed.png' %}">
 
     <!-- Fontawesome icons -->
     <link rel="stylesheet" type="text/css" href="{% static 'vendor/fontawesome-6.5.1/css/all.min.css' %}">

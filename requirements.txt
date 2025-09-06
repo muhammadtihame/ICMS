@@ -3,5 +3,6 @@ gunicorn
 whitenoise
 dj-database-url==2.1.0
 
-# Google Cloud Storage (optional - for model loading from GCS)
+# Google Cloud Storage and Django Storages
+django-storages==1.14.3
 google-cloud-storage==2.10.0
