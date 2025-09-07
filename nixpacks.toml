@@ -1,5 +1,6 @@
 [phases.setup]
 nixPkgs = ["python39", "pip"]
+cmds = ["echo 'Using requirements/production.txt for installation'"]
 
 [phases.install]
 cmds = ["pip install -r requirements/production.txt"]
