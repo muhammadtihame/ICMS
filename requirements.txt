@@ -1,9 +1,11 @@
 # Core Django and deployment dependencies
-Django>=4.0
+Django>=4.0,<5.0
 gunicorn
 psycopg2-binary
 dj-database-url
 whitenoise
+djangorestframework
+django-cors-headers
 
 # Timezone and image processing
 pytz==2022.7
@@ -42,3 +44,4 @@ pulp==2.7.0
 
 # Google Cloud Storage (optional)
 django-storages
+google-cloud-storage
