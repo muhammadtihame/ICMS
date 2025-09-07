@@ -11,8 +11,8 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-# Use production settings on Render
-if os.environ.get('RENDER'):
+# Use production settings for cloud deployment
+if os.environ.get('RENDER') or os.environ.get('RAILPACK') or os.environ.get('DJANGO_SETTINGS_MODULE'):
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings_production")
 else:
     os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
