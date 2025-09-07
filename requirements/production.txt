@@ -1,11 +1,1 @@
--r base.txt
-
-# Production server
-gunicorn==21.2.0
-whitenoise==6.2.0
-
-# Database
-psycopg2-binary==2.9.9
-
-# Environment variables
-python-decouple==3.8
+-r ../requirements.txt
