@@ -1,17 +1,26 @@
 {
-  "phases": {
-    "setup": {
-      "nixPkgs": ["python39", "pip"],
-      "cmds": ["echo 'Setting up Python environment'"]
+    "phases": {
+        "setup": {
+            "nixPkgs": [
+                "python39",
+                "pip"
+            ],
+            "cmds": [
+                "echo 'Setting up Python environment'"
+            ]
+        },
+        "install": {
+            "cmds": [
+                "pip install -r requirements/production.txt"
+            ]
+        },
+        "build": {
+            "cmds": [
+                "python manage.py collectstatic --noinput"
+            ]
+        }
     },
-    "install": {
-      "cmds": ["pip install -r requirements/production.txt"]
-    },
-    "build": {
-      "cmds": ["python manage.py collectstatic --noinput"]
+    "start": {
+        "cmd": "gunicorn config.wsgi --log-file -"
     }
-  },
-  "start": {
-    "cmd": "gunicorn config.wsgi --log-file -"
-  }
 }
