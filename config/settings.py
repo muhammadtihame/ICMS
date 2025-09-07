@@ -22,10 +22,10 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY", "ud76-@_%zlkiummv_8qv&7^r+q$1=p11aao9fjq(^_hp5f)%p(")
+SECRET_KEY = os.environ.get("SECRET_KEY", "ud76-@_%zlkiummv_8qv&7^r+q$1=p11aao9fjq(^_hp5f)%p(")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config("DEBUG", default=True, cast=bool)
+DEBUG = os.environ.get("DEBUG", "False") == "True"
 
 # =============================================================================
 # DEVELOPMENT SECURITY SETTINGS (Flexible HTTP/HTTPS)
@@ -62,7 +62,7 @@ X_FRAME_OPTIONS = None
 USE_HTTPS = False
 FORCE_HTTPS = False
 
-ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,localhost,testserver", cast=lambda v: [s.strip() for s in v.split(',')])
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
 
 # change the default user models to our custom model
 AUTH_USER_MODEL = "accounts.User"
@@ -155,9 +155,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 DATABASES = {
-    'default': dj_database_url.config(
-        default='sqlite:///' + os.path.join(BASE_DIR, 'db.sqlite3')
-    )
+    "default": dj_database_url.config(default=os.environ.get("DATABASE_URL"))
 }
 
 # https://docs.djangoproject.com/en/stable/ref/settings/#std:setting-DEFAULT_AUTO_FIELD
