@@ -1,9 +1,8 @@
 [phases.setup]
 nixPkgs = ["python39", "pip"]
-cmds = ["echo 'Using requirements/production.txt for installation'"]
 
 [phases.install]
-cmds = ["pip install -r requirements/production.txt"]
+cmds = ["pip install -r requirements.txt"]
 
 [phases.build]
 cmds = ["python manage.py collectstatic --noinput"]
